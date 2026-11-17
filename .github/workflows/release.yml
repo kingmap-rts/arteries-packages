@@ -1,0 +1,40 @@
+name: Release
+
+# Publishes every package whose version in package.json is not in GitHub Packages yet.
+# To release: bump the version in the package's package.json and merge to main
+# (or run this workflow by hand from the Actions tab).
+on:
+  push:
+    branches: [main]
+    paths: ['packages/arteries-protocol/**', 'packages/arteries-core/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: release
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build
+        run: yarn build
+      - name: Test
+        run: yarn test
+      - name: Publish new versions
+        run: node scripts/publish-new.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

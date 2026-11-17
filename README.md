@@ -1,1 +1,115 @@
 # arteries-packages
+
+Monorepo of private packages of the «Артерії» game, shared by `arteries-front` and
+`arteries-backend`, managed with [Yarn workspaces](https://yarnpkg.com/features/workspaces) +
+[lerna](https://lerna.js.org/) and published to the private
+[GitHub Packages](https://npm.pkg.github.com) registry.
+
+## Packages
+
+| Package                                                                 | What it is                                                         | Used by                            |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
+| [`@caspen13/arteries-protocol`](./packages/arteries-protocol/README.md) | game vocabulary, player intents, WebSocket messages, replays       | front + backend                    |
+| [`@caspen13/arteries-core`](./packages/arteries-core/README.md)         | deterministic simulation (lockstep), rule tables for the renderers | front (+ backend for match checks) |
+| `@caspen13/arteries-tools` (private, not published)                     | balance and QA tools: headless bot matches, replay export, soak    | developers                         |
+
+`arteries-core` depends on `arteries-protocol` and re-exports it, so the front needs one import.
+The backend needs only the protocol until it starts re-simulating matches.
+
+## Prerequisites
+
+- Node.js `>= 22`
+- Yarn `4.x` (via Corepack: `corepack enable`)
+- A GitHub Personal Access Token with `read:packages` (to install) and `write:packages`
+  (to publish), with access to the `Caspen13/arteries-packages` repo.
+
+## Setup (this repo)
+
+```bash
+cp .env.example .env   # paste your token
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
+yarn install
+yarn build
+yarn test
+```
+
+The token is read from the `GITHUB_TOKEN` env var by both `.npmrc` and `.yarnrc.yml` —
+**it is never committed**.
+
+| Command                                   | What it does                                        |
+| ----------------------------------------- | --------------------------------------------------- |
+| `yarn build`                              | builds every package into its `lib/` (tsc)          |
+| `yarn dev`                                | tsc --watch in every package                        |
+| `yarn test`                               | tests (core: golden matches, rules, determinism, …) |
+| `yarn typecheck`                          | strict type check of sources and tests              |
+| `yarn check-quality` / `yarn fix-quality` | ESLint                                              |
+| `yarn check-formatting` / `yarn format`   | Prettier                                            |
+
+## Consuming the packages
+
+In `arteries-front` / `arteries-backend`, add an `.npmrc` at the repo root:
+
+```
+@caspen13:registry=https://npm.pkg.github.com
+always-auth=true
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+Then export the token and install:
+
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
+yarn add @caspen13/arteries-core          # front
+yarn add @caspen13/arteries-protocol      # backend
+```
+
+For CI and Docker builds, pass `GITHUB_TOKEN` as a secret rather than committing it.
+
+## Tools
+
+```bash
+yarn build                                                     # tools run on the built core
+yarn workspace @caspen13/arteries-tools sim doctrines 14 2100 out/doctrines.jsonl
+yarn workspace @caspen13/arteries-tools one 42 1500            # one quick bot match
+yarn workspace @caspen13/arteries-tools cmap 7                 # map of a seed → out/cmap7.svg
+yarn workspace @caspen13/arteries-tools replay:export ../arteries-data/replays out/replays
+yarn workspace @caspen13/arteries-tools net:soak ws://localhost:8787/ws 6 900   # needs a running backend
+python3 packages/arteries-tools/src/sim/an_ai.py out/ai_old.jsonl out/ai_new.jsonl
+```
+
+Outputs go to `packages/arteries-tools/out/` (gitignored).
+
+## Adding a new package
+
+```bash
+mkdir -p packages/arteries-<name>/src
+```
+
+Copy `packages/arteries-protocol/{package.json,tsconfig.json}` as a template, rename to
+`@caspen13/arteries-<name>`, add a `publish:<name>` script to the root `package.json`, then
+`yarn install` to wire up the workspace. Cross-package deps use the workspace protocol, e.g.
+`"@caspen13/arteries-protocol": "workspace:^"`.
+
+## Publishing
+
+Versions are **independent** per package (`lerna.json`). Publishing runs in **GitHub Actions**
+(`.github/workflows/release.yml`) with the repository's own token — nobody needs a personal
+token to release:
+
+1. bump the version in the package's `package.json` (`yarn workspace @caspen13/arteries-core version minor`);
+2. merge to `main`.
+
+The workflow builds, runs the tests and publishes every package whose version is not in the
+registry yet (`scripts/publish-new.mjs`, protocol before core). It can also be started by hand
+from the Actions tab. Local fallback with a PAT (`write:packages`) in `.env`:
+`yarn publish:protocol` / `yarn publish:core`.
+
+> **Core versions and online play.** Any change to what the simulation computes changes the
+> state hashes: clients on different core versions desync and old replays stop verifying.
+> Such changes get a **minor** bump, and the front and the backend move to it together.
+
+## Scope
+
+GitHub Packages requires the package scope to match the owner of the repository: the repo
+lives in `Caspen13`, so the scope is `@caspen13`. Moving the repos to a GitHub organization
+means renaming the scope (package names, `.npmrc`, `.yarnrc.yml`, imports).

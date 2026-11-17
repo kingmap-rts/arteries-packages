@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "types": ["node"],
+    "paths": {
+      "@caspen13/arteries-protocol": ["../arteries-protocol/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "test/**/*", "vitest.config.ts"]
+}

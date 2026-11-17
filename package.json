@@ -1,0 +1,48 @@
+{
+  "name": "arteries-packages",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Private packages of the «Артерії» game shared by arteries-front and arteries-backend",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "dev": "lerna run dev --parallel",
+    "clean": "lerna run clean",
+    "test": "lerna run test --stream",
+    "typecheck": "lerna run typecheck",
+    "publish:protocol": "dotenv -- yarn workspace @caspen13/arteries-protocol npm publish",
+    "publish:core": "dotenv -- yarn workspace @caspen13/arteries-core npm publish",
+    "format": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",
+    "check-formatting": "prettier -l \"**/*.{js,ts,json,md,yml,yaml}\"",
+    "fix-formatting": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",
+    "check-quality": "eslint .",
+    "fix-quality": "eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Caspen13/arteries-packages.git"
+  },
+  "author": "Caspen13",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/Caspen13/arteries-packages#readme",
+  "bugs": {
+    "url": "https://github.com/Caspen13/arteries-packages/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "dotenv-cli": "^7.4.4",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "lerna": "^8.1.9",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "yarn@4.9.2"
+}

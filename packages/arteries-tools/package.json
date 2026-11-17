@@ -1,0 +1,24 @@
+{
+  "name": "@caspen13/arteries-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Balance and QA tools for «Артерії»: headless bot matches, replay export, online soak tests (not published)",
+  "type": "module",
+  "scripts": {
+    "sim": "tsx src/sim/run.ts",
+    "one": "tsx src/sim/one.ts",
+    "cmap": "tsx src/sim/cmap.ts",
+    "replay:export": "tsx src/replay/export.ts",
+    "net:client": "tsx src/net/client.ts",
+    "net:soak": "tsx src/net/soak.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@caspen13/arteries-core": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@caspen13/arteries-protocol",
+  "version": "0.1.0",
+  "description": "Contract between the «Артерії» game server and the browser: game vocabulary, player intents, WebSocket messages, replays and their validators",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('./lib',{recursive:true,force:true})\"",
+    "build": "yarn clean && tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "typecheck": "tsc --noEmit",
+    "prepack": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Caspen13/arteries-packages",
+    "directory": "packages/arteries-protocol"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "protocol",
+    "types",
+    "arteries"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

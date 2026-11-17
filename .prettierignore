@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+.yarn
+.pnp.*
+
+# Build output
+**/lib
+**/dist
+
+# Lockfiles & generated
+yarn.lock
+**/test/fixtures
+
+# Env
+.env
+.env.*
