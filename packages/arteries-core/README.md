@@ -42,12 +42,11 @@ its own world, map and random stream.
 
 ## What is exported
 
-| Export                              | For                                                                                             |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `createGame`, `Game`, `TICK`        | running a match                                                                                 |
-| `rules`                             | rule tables (`UNITS`, `BUILDINGS`, `PATHS`, `PERKS`, …), map constants, pure helpers for the UI |
-| `World`, `Player`, `Unit`, …        | types of the world the renderer reads                                                           |
-| everything from `arteries-protocol` | `Intent`, `ClientMsg`, `Replay`, `cleanIntent`, …                                               |
+| Export                       | For                                                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| `createGame`, `Game`, `TICK` | running a match                                                                                 |
+| `rules`                      | rule tables (`UNITS`, `BUILDINGS`, `PATHS`, `PERKS`, …), map constants, pure helpers for the UI |
+| `World`, `Player`, `Unit`, … | types of the world the renderer reads                                                           |
 
 ## Inside
 

@@ -3,7 +3,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const ORDER = ['arteries-protocol', 'arteries-core'];
+const ORDER = ['arteries-types', 'arteries-protocol', 'arteries-core'];
 const yarn = (args, opts = {}) =>
   execFileSync('yarn', args, { encoding: 'utf8', ...opts });
 

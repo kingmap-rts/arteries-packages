@@ -1,14 +1,13 @@
 // A headless online player: joins a quick match, simulates every turn like the browser does, sends random
 // orders that exercise every mechanic, reports hashes, and prints its final state hash as JSON.
 //   yarn workspace @caspen13/arteries-tools net:client ws://localhost:8787/ws Name uk|en turns seed
+import { createGame, type Game } from '@caspen13/arteries-core';
 import {
-  createGame,
-  HASH_EVERY,
-  type Game,
+  Lockstep,
   type Intent,
   type SeatIntent,
   type ServerMsg,
-} from '@caspen13/arteries-core';
+} from '@caspen13/arteries-types';
 
 // the language argument is kept for old scripts; the core has no text, so it changes nothing
 const [url, nick, , turnsS, seedS] = process.argv.slice(2);
@@ -152,7 +151,8 @@ function pump(g: Game) {
     }
     next++;
     g.drainNotices();
-    if (next % HASH_EVERY === 0) out({ t: 'hash', n: next, h: g.hash() });
+    if (next % Lockstep.HashEvery === 0)
+      out({ t: 'hash', n: next, h: g.hash() });
     if (next % 20 === 0) randomOrders(g);
     if (next >= TURNS) {
       const G = g.world;

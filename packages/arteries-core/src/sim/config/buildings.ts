@@ -1,28 +1,12 @@
 /** Buildings, post specialisations and production sites. */
 import type {
+  BuildingSpec,
   BuildingType,
-  Resource,
+  SiteSpec,
   SiteType,
+  SpecSpec,
   SpecType,
-} from '../world/types';
-
-export interface BuildingSpec {
-  hp: number;
-  icon: string;
-  wood?: number;
-  steel?: number;
-}
-export interface SpecSpec {
-  icon: string;
-  wood: number;
-  steel: number;
-}
-export interface SiteSpec {
-  icon: string;
-  res: Resource;
-  /** production per second */
-  y: number;
-}
+} from '@caspen13/arteries-types';
 
 export const BUILDINGS: Record<BuildingType, BuildingSpec> = {
   hq: { hp: 900, icon: '★' },

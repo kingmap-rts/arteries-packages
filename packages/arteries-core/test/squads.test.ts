@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createGame, rules, type Game, type UnitType } from '../src/index';
+import type { UnitType } from '@caspen13/arteries-types';
+import { createGame, rules, type Game } from '../src/index';
 import { memberLoss } from '../src/sim/systems/squads';
 
 const start = () =>

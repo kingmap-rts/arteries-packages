@@ -8,7 +8,6 @@ import {
   SEATS,
   TILES,
   Terrain,
-  type TerrainCode,
 } from '../config/map';
 import {
   matchState,
@@ -33,7 +32,7 @@ export function genMap() {
     for (let x = 0; x < MAP_W; x++) {
       const h = fbm(x / 10, y / 10, s);
       const f = fbm(x / 6 + 50, y / 6 + 50, s + 7);
-      let t: TerrainCode = Terrain.Plain;
+      let t: Terrain = Terrain.Plain;
       if (h < 0.37) t = Terrain.Water;
       else if (h > 0.66) t = Terrain.Mountain;
       else if (f > 0.56) t = Terrain.Forest;

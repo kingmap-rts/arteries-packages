@@ -1,54 +1,14 @@
-import { MAX_PLAYERS } from './messages';
-import type {
-  GiftResource,
-  PathId,
-  PingKind,
-  SayKind,
-  SpecType,
-  TradeResource,
-  UnitType,
-} from './vocabulary';
-
-/** A player's command. Seats are 0..MAX_PLAYERS-1; ids refer to entity ids in the world. */
-export type Intent =
-  | { t: 'move'; ids: number[]; x: number; y: number; mode?: 'move' | 'amove' }
-  | { t: 'attack'; ids: number[]; target: number }
-  | { t: 'stop'; ids: number[] }
-  | { t: 'build'; x: number; y: number }
-  | { t: 'train'; type: UnitType }
-  | { t: 'spec'; b: number; s: SpecType }
-  /** where new troops appear */
-  | { t: 'spawn'; b: number }
-  /** hire troops automatically */
-  | { t: 'auto'; on: boolean }
-  /** choose a path (Шлях) for 3 mana */
-  | { t: 'doctrine'; d: PathId }
-  /** buy the next tier of the path, option 0 or 1 */
-  | { t: 'perk'; i: 0 | 1 }
-  /** use the tier-4 ability at a map point */
-  | { t: 'cast'; x: number; y: number }
-  /** walk the selected units of one type together into squads (up to 5 light / 3 heavy) */
-  | { t: 'squad'; ids: number[] }
-  /** split the selected squads back into single soldiers */
-  | { t: 'unsquad'; ids: number[] }
-  /** a short message to another ruler */
-  | { t: 'say'; to: number; k: SayKind }
-  /** propose an alliance, or accept one offered by that seat */
-  | { t: 'ally'; to: number }
-  /** break an alliance (traitor for 2 min), or decline / withdraw an offer */
-  | { t: 'unally'; to: number }
-  /** ask to renew a pact; it renews when both sides asked */
-  | { t: 'renew'; to: number }
-  /** send a caravan of one resource from your castle to an ally's castle */
-  | { t: 'gift'; to: number; res: GiftResource }
-  /** market at the castle: 30 of one resource for 10 of another */
-  | { t: 'trade'; from: TradeResource; to: TradeResource }
-  /** map signal seen by you and your allies */
-  | { t: 'ping'; x: number; y: number; k: PingKind }
-  /** injected by the server when a player leaves or drops: a bot takes over the seat */
-  | { t: 'leave' };
-
-export type IntentType = Intent['t'];
+import {
+  Limits,
+  type GiftResource,
+  type Intent,
+  type PathId,
+  type PingKind,
+  type SayKind,
+  type SpecType,
+  type TradeResource,
+  type UnitType,
+} from '@caspen13/arteries-types';
 
 const PLAYER_INTENTS = new Set<string>([
   'move',
@@ -94,7 +54,9 @@ const num = (v: unknown): v is number =>
 const ids = (v: unknown): v is number[] =>
   Array.isArray(v) && v.length <= 250 && v.every(num);
 const seat = (v: unknown): v is number =>
-  Number.isInteger(v) && (v as number) >= 0 && (v as number) < MAX_PLAYERS;
+  Number.isInteger(v) &&
+  (v as number) >= 0 &&
+  (v as number) < Limits.MaxPlayers;
 const oneOf = <T extends string>(list: readonly T[], v: unknown): v is T =>
   list.includes(v as T);
 

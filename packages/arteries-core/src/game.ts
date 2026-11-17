@@ -1,8 +1,12 @@
-import type {
-  Difficulty,
-  GameMessage,
-  Intent,
-} from '@caspen13/arteries-protocol';
+import {
+  Lockstep,
+  type GameMap,
+  type GameOptions,
+  type GameResult,
+  type Difficulty,
+  type GameMessage,
+  type Intent,
+} from '@caspen13/arteries-types';
 import { DEFAULT_BOT_PARAMS } from './sim/config/ai';
 import { MAP_H, MAP_W } from './sim/config/map';
 import { buildCheck } from './sim/commands/build';
@@ -13,51 +17,7 @@ import { allied, allyIds, hostile, pactOf } from './sim/systems/diplomacy';
 import { update } from './sim/update';
 import { nearestLinkedDepot } from './sim/world/entities';
 import { newGame } from './sim/world/new-game';
-import type {
-  BotParams,
-  Building,
-  Match,
-  Pact,
-  Site,
-  World,
-} from './sim/world/types';
-
-/** Fixed simulation tick in seconds. Every client steps with exactly this value (= TURN_MS). */
-export const TICK = 0.1;
-
-export interface GameOptions {
-  seed: number;
-  diff?: Difficulty;
-  /** seat -> nick of a human player; every other seat is a bot with no name (default: seat 0 is a human, nick '') */
-  humans?: Record<number, string>;
-  /** headless batch run (balance tools, server checks): no notices, a little faster */
-  headless?: boolean;
-  /** per-seat bot strategy overrides (see DEFAULT_BOT_PARAMS) */
-  botParams?: Record<number, Partial<BotParams>>;
-}
-
-export interface GameResult {
-  over: boolean;
-  winner: number | null;
-  reason: 'domination' | 'elimination' | null;
-  /** world time, seconds */
-  t: number;
-}
-
-/** The map layers of a match, for renderers and minimaps. Read only. */
-export interface GameMap {
-  width: number;
-  height: number;
-  /** terrain code of every tile, row by row (see rules.Terrain) */
-  terrain: Uint8Array;
-  /** deposit code of every tile (see rules.Deposit) */
-  deposits: Uint8Array;
-  sites: Site[];
-  /** site index on every tile (-1 = none) */
-  siteAt: Int16Array;
-  /** passable tiles, the base of land shares */
-  landTiles: number;
-}
+import type { Building, Match, Pact, World } from './sim/world/types';
 
 /**
  * One match. Same seed + same intents in the same order = the same world on every machine.
@@ -110,7 +70,7 @@ export class Game {
   /** Advance one TICK (nothing happens once the match is over). */
   step(): void {
     this.use();
-    if (!this.match.world.over) update(TICK);
+    if (!this.match.world.over) update(Lockstep.TickSeconds);
   }
 
   /** Apply one intent of a seat. Returns why it was refused (a message key for the client to translate), else null. */

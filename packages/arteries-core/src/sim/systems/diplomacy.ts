@@ -7,7 +7,7 @@ import type {
   Player,
   SayKind,
 } from '../world/types';
-import type { GiftResource } from '@caspen13/arteries-protocol';
+import type { GiftResource } from '@caspen13/arteries-types';
 import {
   ALLY_MAX,
   GIFT_AMOUNT,

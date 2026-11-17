@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { TURN_MS } from '@caspen13/arteries-protocol';
-import { createGame, rules, TICK } from '../src/index';
+import { Lockstep, Terrain } from '@caspen13/arteries-types';
+import { createGame, rules } from '../src/index';
 
 describe('intents', () => {
   it('train spends resources and population and adds a unit', () => {
@@ -42,7 +42,7 @@ describe('intents', () => {
   });
 
   it('one simulation tick is one server turn', () => {
-    expect(TICK * 1000).toBe(TURN_MS);
+    expect(Lockstep.TickSeconds * 1000).toBe(Lockstep.TurnMs);
   });
 });
 
@@ -51,8 +51,7 @@ describe('invariants over a 15-minute bot match', () => {
     const game = createGame({ seed: 31337, headless: true, humans: {} });
     const G = game.world;
     const { terrain } = game.map;
-    const walkable = (t: number) =>
-      t === rules.Terrain.Plain || t === rules.Terrain.Forest;
+    const walkable = (t: number) => t === Terrain.Plain || t === Terrain.Forest;
     for (let i = 1; i <= 9000; i++) {
       game.step();
       if (i % 300 !== 0) continue;

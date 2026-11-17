@@ -1,32 +1,5 @@
-import { cleanIntent, type Intent } from './intent';
-import { MAX_PLAYERS } from './messages';
-import type { Difficulty } from './vocabulary';
-
-/**
- * A replay is everything needed to re-simulate a match exactly:
- * the seed, who sat where, and every intent with the tick it was applied on.
- */
-export interface Replay {
-  v: 1;
-  id: string;
-  mode: 'online' | 'local';
-  build: string;
-  startedAt: string;
-  endedAt: string;
-  seed: number;
-  diff: Difficulty;
-  humans: Record<number, string>;
-  /** number of simulated ticks */
-  ticks: number;
-  result: { winner: number | null; reason: string | null; tick: number } | null;
-  /** non-empty turns only: [tick, [[seat, intent], ...]] */
-  turns: [number, [number, Intent][]][];
-  /** agreed state hashes at some ticks, to verify a re-simulation */
-  checks: Record<number, string>;
-}
-
-/** biggest replay a client may upload */
-export const REPLAY_MAX_BYTES = 4 * 1024 * 1024;
+import { Limits, type Intent, type Replay } from '@caspen13/arteries-types';
+import { cleanIntent } from './intent';
 
 /** Shape check for replays uploaded by clients (local games). */
 export function cleanReplay(x: any): Replay | null {
@@ -48,7 +21,7 @@ export function cleanReplay(x: any): Replay | null {
     const list: [number, Intent][] = [];
     for (const [seat, it] of t[1]) {
       const c = cleanIntent(it);
-      if (c && Number.isInteger(seat) && seat >= 0 && seat < MAX_PLAYERS)
+      if (c && Number.isInteger(seat) && seat >= 0 && seat < Limits.MaxPlayers)
         list.push([seat, c]);
     }
     if (list.length) turns.push([t[0], list]);
@@ -59,7 +32,7 @@ export function cleanReplay(x: any): Replay | null {
     if (Number.isInteger(+k) && typeof v === 'string')
       checks[+k] = v.slice(0, 16);
   for (const [k, v] of Object.entries(x.humans ?? {}))
-    if (+k >= 0 && +k < MAX_PLAYERS) humans[+k] = String(v).slice(0, 16);
+    if (+k >= 0 && +k < Limits.MaxPlayers) humans[+k] = String(v).slice(0, 16);
   const r =
     x.result && typeof x.result === 'object'
       ? {

@@ -1,35 +1,20 @@
 # @caspen13/arteries-protocol
 
-The contract between the game server and the browser. No simulation, no runtime dependencies.
+The runtime half of the contract between the game server and the browser — no types here
+(they are in `@caspen13/arteries-types`):
 
-- **Vocabulary** — `Resource`, `UnitType`, `SpecType`, `PathId`, `PerkId`, `Difficulty`, …
-- **Intents** — `Intent` (every player command) and `cleanIntent()`, the strict validator the
-  server runs on everything a player sends.
-- **Messages** — `ClientMsg` / `ServerMsg` (JSON `{ t: ... }` over one WebSocket), `TURN_MS`,
-  `HASH_EVERY`, `MAX_PLAYERS`, `spreadSeats()`.
-- **Replays** — `Replay` (seed + every intent with its tick + agreed hashes),
-  `cleanReplay()`, `REPLAY_MAX_BYTES`.
+- `cleanIntent(x)` — strict validator for what a player sends; returns a clean `Intent` or null
+  ('leave' is server-only and always rejected);
+- `cleanReplay(x)` — shape check for replays uploaded by clients;
+- `spreadSeats(k)` — spreads human seats around the ring of start positions.
 
 ```ts
-import {
-  cleanIntent,
-  type ClientMsg,
-  type ServerMsg,
-} from '@caspen13/arteries-protocol';
+import { cleanIntent } from '@caspen13/arteries-protocol';
+import type { ClientMsg } from '@caspen13/arteries-types';
 
 const m: ClientMsg = JSON.parse(data);
 if (m.t === 'i') {
-  const intent = cleanIntent(m.i); // null when malformed or server-only
+  const intent = cleanIntent(m.i);
   if (intent) pending.push([seat, intent]);
 }
 ```
-
-## How a match runs (lockstep)
-
-```
-browser ──{t:'i', intent}──▶ server ──{t:'turn', n, [[seat, intent]…]}──▶ every browser
-browser ──{t:'hash', n, h}─▶ server ──{t:'desync', n}──────────────────▶ (if hashes differ)
-```
-
-The server orders intents into turns (one every `TURN_MS`); every browser applies turn `n`
-and simulates tick `n` with `@caspen13/arteries-core`, so all worlds stay identical.

@@ -1,14 +1,14 @@
 // Draws the map of a seed as an SVG (terrain, mana, springs, castles).
 //   yarn workspace @caspen13/arteries-tools cmap <seed> [out.svg]
 import { writeFileSync } from 'node:fs';
-import { createGame, rules } from '@caspen13/arteries-core';
+import { createGame } from '@caspen13/arteries-core';
+import { Deposit, Terrain } from '@caspen13/arteries-types';
 
 const seed = +(process.argv[2] ?? 1);
 const out = process.argv[3] ?? `out/cmap${seed}.svg`;
 const game = createGame({ seed, diff: 1, humans: { 0: 'A' }, headless: true });
 const { width: W, height: H, terrain, deposits, sites } = game.map;
 const S = 5;
-const { Terrain, Deposit } = rules;
 let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * S}" height="${H * S}"><rect width="100%" height="100%" fill="#7a9a5a"/>`;
 for (let y = 0; y < H; y++)
   for (let x = 0; x < W; x++) {

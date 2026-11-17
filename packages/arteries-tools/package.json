@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caspen13/arteries-core": "workspace:^"
+    "@caspen13/arteries-core": "workspace:^",
+    "@caspen13/arteries-types": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

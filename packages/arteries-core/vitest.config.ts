@@ -6,6 +6,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
+      '@caspen13/arteries-types': fileURLToPath(
+        new URL('../arteries-types/src/index.ts', import.meta.url),
+      ),
       '@caspen13/arteries-protocol': fileURLToPath(
         new URL('../arteries-protocol/src/index.ts', import.meta.url),
       ),

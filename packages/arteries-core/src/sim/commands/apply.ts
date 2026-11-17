@@ -9,7 +9,7 @@ import type {
   TradeResource,
   Unit,
 } from '../world/types';
-import type { GiftResource, Intent } from '@caspen13/arteries-protocol';
+import type { GiftResource, Intent } from '@caspen13/arteries-types';
 import { build, specialize, train } from './build';
 import { UNITS } from '../config/units';
 import { G } from '../state';

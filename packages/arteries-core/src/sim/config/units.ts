@@ -1,37 +1,5 @@
 /** Unit types and the numbers of wagons, bandits and ammunition. */
-import type { PathId, UnitType } from '../world/types';
-
-export interface UnitSpec {
-  hp: number;
-  dmg: number;
-  range: number;
-  /** seconds between blows */
-  cd: number;
-  speed: number;
-  steel: number;
-  wood: number;
-  food: number;
-  /** people it takes (default 1) */
-  pop?: number;
-  /** food eaten per second */
-  upk: number;
-  /** damage multipliers against caravans, buildings and units */
-  vsC: number;
-  vsB: number;
-  vsU?: number;
-  /** distance at which it notices enemies */
-  aggro: number;
-  /** arrows carried */
-  ammo: number;
-  /** steel per arrow (default AMMO_COST) */
-  ammoCost?: number;
-  /** fights without arrows */
-  noAmmo?: boolean;
-  /** seconds standing still before it can fire */
-  deploy?: number;
-  /** only for this path */
-  doc?: PathId;
-}
+import type { UnitSpec, UnitType } from '@caspen13/arteries-types';
 
 export const UNITS: Record<UnitType, UnitSpec> = {
   inf: {

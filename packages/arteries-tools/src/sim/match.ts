@@ -1,5 +1,6 @@
 // Runs one headless bot-vs-bot match and returns a compact summary.
-import { createGame, rules, type BotParams } from '@caspen13/arteries-core';
+import { createGame, rules } from '@caspen13/arteries-core';
+import type { BotParams } from '@caspen13/arteries-types';
 
 export interface MatchSpec {
   seed: number;

@@ -9,12 +9,13 @@ Monorepo of private packages of the «Артерії» game, shared by `arteries
 
 | Package                                                                 | What it is                                                         | Used by                            |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
-| [`@caspen13/arteries-protocol`](./packages/arteries-protocol/README.md) | game vocabulary, player intents, WebSocket messages, replays       | front + backend                    |
+| [`@caspen13/arteries-types`](./packages/arteries-types/README.md)       | every shared type + constant enums (protocol, world, HTTP API)     | everyone                           |
+| [`@caspen13/arteries-protocol`](./packages/arteries-protocol/README.md) | validators for what players send (`cleanIntent`, `cleanReplay`)    | backend                            |
 | [`@caspen13/arteries-core`](./packages/arteries-core/README.md)         | deterministic simulation (lockstep), rule tables for the renderers | front (+ backend for match checks) |
 | `@caspen13/arteries-tools` (private, not published)                     | balance and QA tools: headless bot matches, replay export, soak    | developers                         |
 
-`arteries-core` depends on `arteries-protocol` and re-exports it, so the front needs one import.
-The backend needs only the protocol until it starts re-simulating matches.
+Types live only in `arteries-types`; `arteries-protocol` and `arteries-core` depend on it.
+Import types from `@caspen13/arteries-types`, validators from the protocol, the simulation from the core.
 
 ## Prerequisites
 
@@ -59,8 +60,9 @@ Then export the token and install:
 
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
-yarn add @caspen13/arteries-core          # front
-yarn add @caspen13/arteries-protocol      # backend
+yarn add @caspen13/arteries-types         # everyone: types and shared constants
+yarn add @caspen13/arteries-core          # front (and backend for match checks)
+yarn add @caspen13/arteries-protocol      # backend: validators
 ```
 
 For CI and Docker builds, pass `GITHUB_TOKEN` as a secret rather than committing it.

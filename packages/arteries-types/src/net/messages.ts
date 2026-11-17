@@ -1,13 +1,6 @@
 /** Wire protocol between the game server and the browser: JSON over one WebSocket. */
-import type { Intent } from './intent';
-import type { Difficulty } from './vocabulary';
-
-/** One server turn = one simulation tick (0.1 s). */
-export const TURN_MS = 100;
-/** Clients report their state hash every HASH_EVERY turns. */
-export const HASH_EVERY = 50;
-/** Seats in a match (people + bots). */
-export const MAX_PLAYERS = 10;
+import type { Intent } from '../game/intent';
+import type { Difficulty } from '../game/vocabulary';
 
 /** [seat, intent]: what one player did in a turn */
 export type SeatIntent = [seat: number, intent: Intent];
@@ -71,10 +64,3 @@ export type ServerMsg =
     }
   | { t: 'desync'; n: number }
   | { t: 'err'; code: ServerError };
-
-/** Spread human seats around the ring of start positions. */
-export function spreadSeats(k: number, np = MAX_PLAYERS): number[] {
-  const out: number[] = [];
-  for (let i = 0; i < k; i++) out.push(Math.round((i * np) / k) % np);
-  return out;
-}

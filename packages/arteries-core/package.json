@@ -1,6 +1,6 @@
 {
   "name": "@caspen13/arteries-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Deterministic simulation of «Артерії» (lockstep): the same seed and intents give the same world in the browser and on the server",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -41,7 +41,8 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@caspen13/arteries-protocol": "workspace:^"
+    "@caspen13/arteries-protocol": "workspace:^",
+    "@caspen13/arteries-types": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

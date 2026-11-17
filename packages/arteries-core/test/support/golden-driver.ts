@@ -1,6 +1,7 @@
 // The only place the golden test touches the core API: adapt it here when the API changes,
 // the recorded fixtures stay as they are.
-import { createGame, type Intent } from '../../src/index';
+import type { Intent } from '@caspen13/arteries-types';
+import { createGame } from '../../src/index';
 
 export interface Driver {
   apply(seat: number, intent: Intent): void;

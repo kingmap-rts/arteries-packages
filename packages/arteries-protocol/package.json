@@ -1,7 +1,7 @@
 {
   "name": "@caspen13/arteries-protocol",
-  "version": "0.2.0",
-  "description": "Contract between the «Артерії» game server and the browser: game vocabulary, player intents, WebSocket messages, replays and their validators",
+  "version": "0.3.0",
+  "description": "Validators for what players send to the «Артерії» server (intents, replays) and the seat layout; types live in @caspen13/arteries-types",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [
@@ -39,5 +39,8 @@
   },
   "devDependencies": {
     "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@caspen13/arteries-types": "workspace:^"
   }
 }

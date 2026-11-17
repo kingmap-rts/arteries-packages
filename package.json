@@ -15,6 +15,7 @@
     "clean": "lerna run clean",
     "test": "lerna run test --stream",
     "typecheck": "lerna run typecheck",
+    "publish:types": "dotenv -- yarn workspace @caspen13/arteries-types npm publish",
     "publish:protocol": "dotenv -- yarn workspace @caspen13/arteries-protocol npm publish",
     "publish:core": "dotenv -- yarn workspace @caspen13/arteries-core npm publish",
     "format": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",

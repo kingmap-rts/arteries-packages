@@ -6,17 +6,7 @@
  */
 
 // ---- map ----
-export {
-  SEATS,
-  TILE_PX,
-  MAP_W,
-  MAP_H,
-  TILES,
-  Terrain,
-  Deposit,
-  COLORS,
-} from './sim/config/map';
-export type { TerrainCode, DepositCode } from './sim/config/map';
+export { SEATS, TILE_PX, MAP_W, MAP_H, TILES, COLORS } from './sim/config/map';
 
 // ---- roads and territory ----
 export {
@@ -38,14 +28,12 @@ export {
   BAG_CAP,
   AMMO_COST,
 } from './sim/config/units';
-export type { UnitSpec } from './sim/config/units';
 export {
   BUILDINGS,
   POST_SPECS,
   SITE_TYPES,
   SITE_WORKERS,
 } from './sim/config/buildings';
-export type { BuildingSpec, SpecSpec, SiteSpec } from './sim/config/buildings';
 
 // ---- economy ----
 export {
@@ -86,7 +74,6 @@ export {
   SAY_KINDS,
 } from './sim/config/diplomacy';
 export { PATH_COST, ULT_COOLDOWN, PATHS, PERKS } from './sim/config/paths';
-export type { PathSpec, PerkSpec } from './sim/config/paths';
 
 // ---- pure helpers ----
 export { tileIndex, inBounds, dist, segmentDist } from './sim/util/geometry';

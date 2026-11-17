@@ -1,9 +1,5 @@
 /** Alliances, gifts, map signals and short messages. */
-import type {
-  GiftResource,
-  PingKind,
-  SayKind,
-} from '@caspen13/arteries-protocol';
+import type { GiftResource, PingKind, SayKind } from '@caspen13/arteries-types';
 
 // Pacts last 8 min and can be renewed by both sides. Breaking one early marks you a traitor for 2 min:
 // no new alliances in that time. Allies never fight, share supply and do not cut each other's roads.

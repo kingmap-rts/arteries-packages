@@ -1,16 +1,10 @@
 /** Paths: costs, unique units, tier perks and the ultimate cooldown. */
-import type { PathId, PerkId, UnitType } from '../world/types';
-
-export interface PathSpec {
-  /** unique unit of the path */
-  unit: UnitType;
-  /** tiers 2-4: pick one of two */
-  perks: [PerkId, PerkId][];
-}
-export interface PerkSpec {
-  /** tier-4 ability used with cast */
-  ult?: 1;
-}
+import type {
+  PathId,
+  PathSpec,
+  PerkId,
+  PerkSpec,
+} from '@caspen13/arteries-types';
 
 // Chosen in the match with mana crystals. Tier 1 (3💎): trait + unique unit. Tiers 2-4: pick one of two.
 export const PATH_COST: number[] = [3, 4, 6, 9];
