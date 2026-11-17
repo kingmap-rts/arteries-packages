@@ -4,6 +4,18 @@ Private packages of «Артерії» published to GitHub Packages (Yarn worksp
 modelled on `land-packages`. Each package has its own `CLAUDE.md` with conventions:
 `packages/arteries-protocol`, `packages/arteries-core`.
 
+## Where types go
+
+All types shared between projects live in `@caspen13/arteries-types` — nowhere else:
+
+- every backend endpoint: request bodies, query/params, responses, WebSocket messages
+  (`api/`, `net/` in the package);
+- the front end's types that describe data from the server or the game (`game/`, `net/`);
+- shared constants as enums.
+  Packages, the backend and the front import them from there; a project keeps a type locally only
+  when nothing outside it uses it. A new endpoint or message = its types in arteries-types first,
+  then a version bump (minor if it changes what crosses the wire), then the code in the projects.
+
 ## Package manager: Yarn only
 
 This project uses **Yarn 4** (Berry, pinned in `package.json` → `packageManager`, run through

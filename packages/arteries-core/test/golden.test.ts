@@ -15,7 +15,7 @@ describe(`golden matches (${fixture.recordedWith})`, () => {
   for (const sc of fixture.scenarios) {
     it(
       sc.name,
-      () => {
+      async () => {
         const d = startGolden(sc);
         const humans = Object.keys(sc.humans).map(Number);
         const intents = new Map<number, [number, any][]>();
@@ -26,6 +26,8 @@ describe(`golden matches (${fixture.recordedWith})`, () => {
           events.set(n, [...(events.get(n) ?? []), [kind, v]]);
 
         for (let n = 0; n < sc.ticks; n++) {
+          // let the test runner breathe on slow CI machines (long synchronous loops time it out)
+          if (n % 1000 === 999) await new Promise(r => setImmediate(r));
           for (const [kind, v] of events.get(n) ?? []) {
             if (kind === 'crystal') for (const s of humans) d.addCrystal(s, v);
             if (kind === 'lang') d.setLang(v);
