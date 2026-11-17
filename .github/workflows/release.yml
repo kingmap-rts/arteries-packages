@@ -6,7 +6,11 @@ name: Release
 on:
   push:
     branches: [main]
-    paths: ['packages/arteries-protocol/**', 'packages/arteries-core/**']
+    paths:
+      - 'packages/arteries-protocol/**'
+      - 'packages/arteries-core/**'
+      - 'scripts/publish-new.mjs'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 permissions:
