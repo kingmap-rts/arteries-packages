@@ -89,11 +89,14 @@ const TRADE: TradeResource[] = ['wood', 'ore', 'steel', 'food'];
 const GIFTS: GiftResource[] = ['wood', 'steel', 'food', 'crystal'];
 const PINGS: PingKind[] = ['attack', 'help', 'retreat'];
 
-const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
-const ids = (v: unknown): v is number[] => Array.isArray(v) && v.length <= 250 && v.every(num);
+const num = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v);
+const ids = (v: unknown): v is number[] =>
+  Array.isArray(v) && v.length <= 250 && v.every(num);
 const seat = (v: unknown): v is number =>
   Number.isInteger(v) && (v as number) >= 0 && (v as number) < MAX_PLAYERS;
-const oneOf = <T extends string>(list: readonly T[], v: unknown): v is T => list.includes(v as T);
+const oneOf = <T extends string>(list: readonly T[], v: unknown): v is T =>
+  list.includes(v as T);
 
 /**
  * Strict shape check for intents coming from players. Returns a clean copy, or null when the
@@ -113,15 +116,21 @@ export function cleanIntent(x: any): Intent | null {
           }
         : null;
     case 'attack':
-      return ids(x.ids) && num(x.target) ? { t: 'attack', ids: x.ids, target: x.target } : null;
+      return ids(x.ids) && num(x.target)
+        ? { t: 'attack', ids: x.ids, target: x.target }
+        : null;
     case 'stop':
       return ids(x.ids) ? { t: 'stop', ids: x.ids } : null;
     case 'build':
-      return num(x.x) && num(x.y) ? { t: 'build', x: x.x | 0, y: x.y | 0 } : null;
+      return num(x.x) && num(x.y)
+        ? { t: 'build', x: x.x | 0, y: x.y | 0 }
+        : null;
     case 'train':
       return oneOf(UNIT_TYPES, x.type) ? { t: 'train', type: x.type } : null;
     case 'spec':
-      return num(x.b) && oneOf(SPECS, x.s) ? { t: 'spec', b: x.b, s: x.s } : null;
+      return num(x.b) && oneOf(SPECS, x.s)
+        ? { t: 'spec', b: x.b, s: x.s }
+        : null;
     case 'spawn':
       return num(x.b) ? { t: 'spawn', b: x.b } : null;
     case 'auto':
@@ -131,7 +140,9 @@ export function cleanIntent(x: any): Intent | null {
     case 'perk':
       return { t: 'perk', i: x.i ? 1 : 0 };
     case 'say':
-      return seat(x.to) && oneOf(SAYS, x.k) ? { t: 'say', to: x.to, k: x.k } : null;
+      return seat(x.to) && oneOf(SAYS, x.k)
+        ? { t: 'say', to: x.to, k: x.k }
+        : null;
     case 'squad':
     case 'unsquad':
       return ids(x.ids) ? { t: x.t, ids: x.ids } : null;
@@ -144,7 +155,9 @@ export function cleanIntent(x: any): Intent | null {
         ? { t: 'trade', from: x.from, to: x.to }
         : null;
     case 'gift':
-      return seat(x.to) && oneOf(GIFTS, x.res) ? { t: 'gift', to: x.to, res: x.res } : null;
+      return seat(x.to) && oneOf(GIFTS, x.res)
+        ? { t: 'gift', to: x.to, res: x.res }
+        : null;
     case 'ping':
       return num(x.x) && num(x.y) && oneOf(PINGS, x.k)
         ? { t: 'ping', x: x.x, y: x.y, k: x.k }

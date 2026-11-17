@@ -27,17 +27,19 @@ export function runMatch(spec: MatchSpec) {
     p.ai.cap = 1;
   }
   const shares: number[][] = [];
-  let nextMinute = 60,
-    nextSample = 30;
-  const idle = new Array(10).fill(0),
-    armySamples = new Array(10).fill(0);
-  let t30: number | null = null,
-    t40: number | null = null;
+  let nextMinute = 60;
+  let nextSample = 30;
+  const idle = new Array(10).fill(0);
+  const armySamples = new Array(10).fill(0);
+  let t30: number | null = null;
+  let t40: number | null = null;
   const t0 = performance.now();
   while (!G.over && G.t < spec.maxT) {
     game.step();
     if (G.t >= nextMinute) {
-      const row = players().map((p) => (p.alive ? Math.round(p.land * 1000) / 10 : 0));
+      const row = players().map(p =>
+        p.alive ? Math.round(p.land * 1000) / 10 : 0,
+      );
       shares.push(row);
       const mx = Math.max(...row);
       if (t30 == null && mx >= 30) t30 = Math.round(G.t / 60);
@@ -48,7 +50,11 @@ export function runMatch(spec: MatchSpec) {
       for (const u of G.units)
         if (!u.dead && (u.type === 'inf' || u.type === 'siege')) {
           armySamples[u.owner]++;
-          if (!u.tgt && (!u.path || !u.path.length) && !(u.job && u.jobUntil > G.t))
+          if (
+            !u.tgt &&
+            (!u.path || !u.path.length) &&
+            !(u.job && u.jobUntil > G.t)
+          )
             idle[u.owner]++;
         }
       nextSample += 30;
@@ -72,16 +78,17 @@ export function runMatch(spec: MatchSpec) {
     t: Math.round(G.t),
     ms: Math.round(performance.now() - t0),
     hash: game.hash(),
-    nAlive: ps.filter((p) => p.alive).length,
+    nAlive: ps.filter(p => p.alive).length,
     winner: r.winner,
     reason: r.reason,
     shares,
     events,
     t30,
     t40,
-    res: ps.map((p) => {
+    res: ps.map(p => {
       const units: Record<string, number> = {};
-      for (const u of G.units) if (u.owner === p.id) units[u.type] = (units[u.type] || 0) + 1;
+      for (const u of G.units)
+        if (u.owner === p.id) units[u.type] = (units[u.type] || 0) + 1;
       return {
         id: p.id,
         doc: (p as any).doc,

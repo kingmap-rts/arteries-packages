@@ -6,16 +6,22 @@ import { findPath } from './pathfinding';
 import { dist, tileIndex, vecLen } from '../util/geometry';
 import { walkable } from '../world/terrain';
 
-export function moveToward(e: Unit, tx: number, ty: number, speed: number, dt: number) {
-  const dx = tx - e.x,
-    dy = ty - e.y,
-    d = vecLen(dx, dy);
+export function moveToward(
+  e: Unit,
+  tx: number,
+  ty: number,
+  speed: number,
+  dt: number,
+) {
+  const dx = tx - e.x;
+  const dy = ty - e.y;
+  const d = vecLen(dx, dy);
   if (d < 1e-4) return true;
   const tk = tileIndex(e.x | 0, e.y | 0);
   const sp = speed * (terrainMap[tk] === Terrain.Forest ? 0.75 : 1) * dt;
   const st = Math.min(sp, d);
-  const nx = e.x + (dx / d) * st,
-    ny = e.y + (dy / d) * st;
+  const nx = e.x + (dx / d) * st;
+  const ny = e.y + (dy / d) * st;
   e.ang = Math.atan2(dy, dx);
   if (walkable(nx | 0, ny | 0)) {
     e.x = nx;
@@ -32,8 +38,8 @@ export function moveToward(e: Unit, tx: number, ty: number, speed: number, dt: n
 export function followPath(e: Unit, speed: number, dt: number) {
   if (!e.path || !e.path.length) return true;
   const [wx, wy] = e.path[0];
-  const tx = wx + 0.5,
-    ty = wy + 0.5;
+  const tx = wx + 0.5;
+  const ty = wy + 0.5;
   if (dist(e.x, e.y, tx, ty) < 0.12 || moveToward(e, tx, ty, speed, dt)) {
     e.path.shift();
   }
@@ -49,14 +55,21 @@ export const SPIRAL = (() => {
   return a;
 })();
 
-export function orderMove(units: Unit[], tx: number, ty: number, mode?: 'move' | 'amove') {
+export function orderMove(
+  units: Unit[],
+  tx: number,
+  ty: number,
+  mode?: 'move' | 'amove',
+) {
   tx = Math.max(0, Math.min(MAP_W - 1, tx | 0));
   ty = Math.max(0, Math.min(MAP_H - 1, ty | 0));
   let k = 0;
-  const sorted = [...units].sort((a, b) => dist(a.x, a.y, tx, ty) - dist(b.x, b.y, tx, ty));
+  const sorted = [...units].sort(
+    (a, b) => dist(a.x, a.y, tx, ty) - dist(b.x, b.y, tx, ty),
+  );
   for (const u of sorted) {
-    let gx = tx,
-      gy = ty;
+    let gx = tx;
+    let gy = ty;
     while (k < SPIRAL.length) {
       const [dx, dy] = SPIRAL[k++];
       if (walkable(tx + dx, ty + dy)) {
@@ -89,8 +102,8 @@ export function orderAttack(units: Unit[], ent: Entity) {
 }
 
 export function walkTo(u: Unit, t: Unit) {
-  const gx = Math.round(t.x - 0.5),
-    gy = Math.round(t.y - 0.5);
+  const gx = Math.round(t.x - 0.5);
+  const gy = Math.round(t.y - 0.5);
   u.path = findPath(u.x | 0, u.y | 0, gx, gy);
   u.dest = [gx, gy];
 }

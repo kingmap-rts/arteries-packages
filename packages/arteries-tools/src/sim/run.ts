@@ -20,10 +20,16 @@ export const DOCTRINES: Record<string, object> = {
 function buildJobs(kind: string, per: number, maxT: number): MatchSpec[] {
   const jobs: MatchSpec[] = [];
   let seed = 1000;
-  const all = (P: object) => Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i, P]));
+  const all = (P: object) =>
+    Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i, P]));
   if (kind === 'ai_old' || kind === 'ai_new') {
     for (let k = 0; k < per; k++)
-      jobs.push({ seed: seed++, maxT, tag: kind, botParams: all({ ai2: kind === 'ai_new' }) });
+      jobs.push({
+        seed: seed++,
+        maxT,
+        tag: kind,
+        botParams: all({ ai2: kind === 'ai_new' }),
+      });
   } else if (kind === 'ai_mixed') {
     for (let k = 0; k < per; k++)
       jobs.push({
@@ -38,13 +44,21 @@ function buildJobs(kind: string, per: number, maxT: number): MatchSpec[] {
     // same seeds: everyone with squads, nobody, and every other seat
     for (let k = 0; k < per; k++) {
       jobs.push({ seed: 5000 + k, maxT, tag: 'sq_on' });
-      jobs.push({ seed: 5000 + k, maxT, tag: 'sq_off', botParams: all({ noSquad: true }) });
+      jobs.push({
+        seed: 5000 + k,
+        maxT,
+        tag: 'sq_off',
+        botParams: all({ noSquad: true }),
+      });
       jobs.push({
         seed: 5000 + k,
         maxT,
         tag: 'sq_half',
         botParams: Object.fromEntries(
-          Array.from({ length: 10 }, (_, i) => [i, { noSquad: (i + k) % 2 === 0 }]),
+          Array.from({ length: 10 }, (_, i) => [
+            i,
+            { noSquad: (i + k) % 2 === 0 },
+          ]),
         ),
       });
     }
@@ -52,7 +66,12 @@ function buildJobs(kind: string, per: number, maxT: number): MatchSpec[] {
     // same seeds with and without diplomacy
     for (let k = 0; k < per; k++) {
       jobs.push({ seed: 3000 + k, maxT, tag: 'ally_on' });
-      jobs.push({ seed: 3000 + k, maxT, tag: 'ally_off', botParams: all({ noAlly: true }) });
+      jobs.push({
+        seed: 3000 + k,
+        maxT,
+        tag: 'ally_off',
+        botParams: all({ noAlly: true }),
+      });
     }
   } else if (kind === 'battle') {
     // doctrine stress suite: many scenarios in one run (per = scale factor, 4 → ~92 matches)
@@ -69,12 +88,16 @@ function buildJobs(kind: string, per: number, maxT: number): MatchSpec[] {
         jobs.push({ seed: seed++, maxT, tag, botParams: bp(k), ...extra });
     };
     add('free', 4 * per, () => undefined);
-    add('rot', 4 * per, (k) => seats((i) => ({ doc: D4[(i + k) % 4] })));
+    add('rot', 4 * per, k => seats(i => ({ doc: D4[(i + k) % 4] })));
     add('none', 3 * per, () => seats(() => ({ noDoc: true })));
-    add('half', 4 * per, (k) => seats((i) => ({ noDoc: (i + k) % 2 === 0 })));
-    for (const d of D4) add('mirror_' + d, per, () => seats(() => ({ doc: d })));
-    add('crys_half', 3 * per, (k) => seats((i) => ({ doc: D4[(i + k) % 4] })), { crystal: 0.5 });
-    for (let k = 0; k < per; k++) jobs.push({ seed: 1000 + k, maxT, tag: 'det' });
+    add('half', 4 * per, k => seats(i => ({ noDoc: (i + k) % 2 === 0 })));
+    for (const d of D4)
+      add('mirror_' + d, per, () => seats(() => ({ doc: d })));
+    add('crys_half', 3 * per, k => seats(i => ({ doc: D4[(i + k) % 4] })), {
+      crystal: 0.5,
+    });
+    for (let k = 0; k < per; k++)
+      jobs.push({ seed: 1000 + k, maxT, tag: 'det' });
   } else if (kind === 'half') {
     // doctrine vs no doctrine on alternating seats
     for (let k = 0; k < per; k++)
@@ -83,29 +106,46 @@ function buildJobs(kind: string, per: number, maxT: number): MatchSpec[] {
         maxT,
         tag: 'half',
         botParams: Object.fromEntries(
-          Array.from({ length: 10 }, (_, i) => [i, { noDoc: (i + k) % 2 === 0 }]),
+          Array.from({ length: 10 }, (_, i) => [
+            i,
+            { noDoc: (i + k) % 2 === 0 },
+          ]),
         ),
       });
   } else if (kind === 'doctrines') {
     for (let k = 0; k < per; k++)
       for (const d of Object.keys(DOCTRINES))
-        jobs.push({ seed: seed++, maxT, tag: d, botParams: { 0: DOCTRINES[d] } });
+        jobs.push({
+          seed: seed++,
+          maxT,
+          tag: d,
+          botParams: { 0: DOCTRINES[d] },
+        });
   } else {
     for (let k = 0; k < per; k++)
-      jobs.push({ seed: seed++, maxT, tag: kind, botParams: { 0: DOCTRINES[kind] ?? {} } });
+      jobs.push({
+        seed: seed++,
+        maxT,
+        tag: kind,
+        botParams: { 0: DOCTRINES[kind] ?? {} },
+      });
   }
   return jobs;
 }
 
 if (isMainThread) {
-  const [kind = 'control', perS = '10', maxTS = '1200', out = 'out/results.jsonl'] =
-    process.argv.slice(2);
+  const [
+    kind = 'control',
+    perS = '10',
+    maxTS = '1200',
+    out = 'out/results.jsonl',
+  ] = process.argv.slice(2);
   const jobs = buildJobs(kind, +perS, +maxTS);
   const W = Math.max(1, Math.min(availableParallelism(), jobs.length));
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, '');
-  let next = 0,
-    done = 0;
+  let next = 0;
+  let done = 0;
   const t0 = Date.now();
   console.log(`${jobs.length} matches on ${W} workers → ${out}`);
   for (let w = 0; w < W; w++) {
@@ -117,14 +157,16 @@ if (isMainThread) {
       if (next < jobs.length) worker.postMessage(jobs[next++]);
       else worker.terminate();
     };
-    worker.on('message', (r) => {
+    worker.on('message', r => {
       appendFileSync(out, JSON.stringify(r) + '\n');
       done++;
       if (done % 10 === 0 || done === jobs.length)
-        console.log(`${done}/${jobs.length} · ${Math.round((Date.now() - t0) / 1000)}s`);
+        console.log(
+          `${done}/${jobs.length} · ${Math.round((Date.now() - t0) / 1000)}s`,
+        );
       feed();
     });
-    worker.on('error', (e) => {
+    worker.on('error', e => {
       console.error('worker error', e);
     });
     feed();

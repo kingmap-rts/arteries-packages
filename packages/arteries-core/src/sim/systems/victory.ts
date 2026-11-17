@@ -2,9 +2,8 @@
 import type { Player } from '../world/types';
 import { SEATS } from '../config/map';
 import { DOMINATION_HOLD, DOMINATION_SHARE } from '../config/match';
-import { loc } from '../i18n';
 import { G } from '../state';
-import { logEvent, notify } from '../world/events';
+import { logEvent, msg, notify } from '../world/events';
 
 export function dominationTick(dt: number) {
   for (const p of G.players) {
@@ -21,14 +20,15 @@ export function dominationTick(dt: number) {
           notify(
             i,
             i === p.id
-              ? loc(
-                  `Ти контролюєш ${Math.round(p.land * 100)}% мапи! Втримай ще ${left} с, і перемога твоя`,
-                  `You hold ${Math.round(p.land * 100)}% of the map! Hold it for ${left} s more to win`,
-                )
-              : loc(
-                  `${p.name} контролює ${Math.round(p.land * 100)}% мапи: перемога через ${left} с!`,
-                  `${p.name} holds ${Math.round(p.land * 100)}% of the map: victory in ${left} s!`,
-                ),
+              ? msg('notice.dominationYou', {
+                  percent: Math.round(p.land * 100),
+                  seconds: left,
+                })
+              : msg('notice.domination', {
+                  player: p.id,
+                  percent: Math.round(p.land * 100),
+                  seconds: left,
+                }),
           );
       }
       if (p.domT >= DOMINATION_HOLD) {

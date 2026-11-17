@@ -2,7 +2,6 @@
 import type { PathId, UnitType } from '../world/types';
 
 export interface UnitSpec {
-  name: string;
   hp: number;
   dmg: number;
   range: number;
@@ -36,7 +35,6 @@ export interface UnitSpec {
 
 export const UNITS: Record<UnitType, UnitSpec> = {
   inf: {
-    name: 'Латник',
     hp: 100,
     dmg: 9,
     range: 1.6,
@@ -52,7 +50,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     ammo: 24,
   },
   wagon: {
-    name: 'Обоз',
     hp: 120,
     dmg: 0,
     range: 0,
@@ -69,7 +66,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     ammo: 0,
   },
   siege: {
-    name: 'Требушет',
     hp: 60,
     dmg: 24,
     range: 5,
@@ -89,7 +85,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     deploy: 2,
   },
   builder: {
-    name: 'Будівничий',
     hp: 90,
     dmg: 0,
     range: 0,
@@ -106,7 +101,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     doc: 'guild',
   },
   arsonist: {
-    name: 'Палій',
     hp: 60,
     dmg: 4,
     range: 1.3,
@@ -123,7 +117,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     doc: 'shadow',
   },
   golem: {
-    name: 'Залізний голем',
     hp: 320,
     dmg: 16,
     range: 1.5,
@@ -142,7 +135,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     doc: 'forge',
   },
   militia: {
-    name: 'Ополчення',
     hp: 70,
     dmg: 6,
     range: 1.4,
@@ -159,7 +151,6 @@ export const UNITS: Record<UnitType, UnitSpec> = {
     doc: 'land',
   },
   raid: {
-    name: 'Розбійник',
     hp: 65,
     dmg: 7,
     range: 1.5,

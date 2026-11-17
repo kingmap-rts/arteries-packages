@@ -47,7 +47,8 @@ export function botDiplomacy(p: Player) {
     }
     // the two of us are all that is left: only one can win
     if (
-      G.players.filter((z) => z.alive && z.id !== p.id && hostile(p.id, z.id)).length === 0 &&
+      G.players.filter(z => z.alive && z.id !== p.id && hostile(p.id, z.id))
+        .length === 0 &&
       (p.land || 0) >= (q.land || 0) * 0.8 &&
       rand() < 0.05
     ) {
@@ -55,7 +56,11 @@ export function botDiplomacy(p: Player) {
       continue;
     }
     // a bot weighs the pact once, a minute and a half before it ends: about one in three is let go
-    if (x.until - G.t < 90 && !(x.a === p.id ? x.ra : x.rb) && (q.land || 0) < 0.3) {
+    if (
+      x.until - G.t < 90 &&
+      !(x.a === p.id ? x.ra : x.rb) &&
+      (q.land || 0) < 0.3
+    ) {
       const key = q.id + ':' + Math.round(x.until);
       if (ai.renewKey !== key) {
         ai.renewKey = key;
@@ -90,11 +95,17 @@ export function botDiplomacy(p: Player) {
         break;
       }
     }
-  if (G.t < 180 || mine.length >= 1 || p.traitorUntil > G.t || G.t < (ai.diploAt || 0)) return;
+  if (
+    G.t < 180 ||
+    mine.length >= 1 ||
+    p.traitorUntil > G.t ||
+    G.t < (ai.diploAt || 0)
+  )
+    return;
   ai.diploAt = G.t + 45 + rand() * 45;
   // ask a near neighbour that is not my current target, preferring one also threatened by the leader
-  let best = null,
-    bs = -1e9;
+  let best = null;
+  let bs = -1e9;
   for (const q of G.players) {
     if (
       !q.alive ||
@@ -106,8 +117,11 @@ export function botDiplomacy(p: Player) {
     )
       continue;
     if (allyIds(q.id).length >= ALLY_MAX) continue;
-    const d = dist(q.hq.x, q.hq.y, p.hq.x, p.hq.y),
-      dl = lead && lead.hq && lead !== p ? dist(q.hq.x, q.hq.y, lead.hq.x, lead.hq.y) : 99;
+    const d = dist(q.hq.x, q.hq.y, p.hq.x, p.hq.y);
+    const dl =
+      lead && lead.hq && lead !== p
+        ? dist(q.hq.x, q.hq.y, lead.hq.x, lead.hq.y)
+        : 99;
     const sc = -d * 0.6 - dl * 0.4 + rand() * 8;
     if (sc > bs) {
       bs = sc;

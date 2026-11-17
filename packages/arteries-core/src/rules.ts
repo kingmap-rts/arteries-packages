@@ -1,6 +1,8 @@
 /**
  * The rules of the game for renderers and UI: tables, constants and pure helpers.
  * Everything here is read only. Change the world only through Game.apply().
+ * There is no text here: the client translates rule ids (unit types, specs, sites, paths, perks,
+ * ping and say kinds) and the GameMessage keys of refusals and notices.
  */
 
 // ---- map ----
@@ -13,7 +15,6 @@ export {
   Terrain,
   Deposit,
   COLORS,
-  NAMES,
 } from './sim/config/map';
 export type { TerrainCode, DepositCode } from './sim/config/map';
 
@@ -29,9 +30,21 @@ export {
 } from './sim/config/network';
 
 // ---- units, buildings, sites ----
-export { UNITS, HEAVY_UNITS, WAGON_CAP, WAGON_R, BAG_CAP, AMMO_COST } from './sim/config/units';
+export {
+  UNITS,
+  HEAVY_UNITS,
+  WAGON_CAP,
+  WAGON_R,
+  BAG_CAP,
+  AMMO_COST,
+} from './sim/config/units';
 export type { UnitSpec } from './sim/config/units';
-export { BUILDINGS, POST_SPECS, SITE_TYPES, SITE_WORKERS } from './sim/config/buildings';
+export {
+  BUILDINGS,
+  POST_SPECS,
+  SITE_TYPES,
+  SITE_WORKERS,
+} from './sim/config/buildings';
 export type { BuildingSpec, SpecSpec, SiteSpec } from './sim/config/buildings';
 
 // ---- economy ----
@@ -56,7 +69,11 @@ export {
 } from './sim/config/economy';
 
 // ---- match, diplomacy, paths ----
-export { DOMINATION_SHARE, DOMINATION_HOLD, DIFFICULTY } from './sim/config/match';
+export {
+  DOMINATION_SHARE,
+  DOMINATION_HOLD,
+  DIFFICULTY,
+} from './sim/config/match';
 export { DEFAULT_BOT_PARAMS } from './sim/config/ai';
 export {
   PACT_TIME,
@@ -65,8 +82,8 @@ export {
   ALLY_MAX,
   GIFT_COOLDOWN,
   GIFT_AMOUNT,
-  PINGS,
-  MESSAGES,
+  PING_KINDS,
+  SAY_KINDS,
 } from './sim/config/diplomacy';
 export { PATH_COST, ULT_COOLDOWN, PATHS, PERKS } from './sim/config/paths';
 export type { PathSpec, PerkSpec } from './sim/config/paths';
@@ -79,18 +96,18 @@ export { noiseHash, fbm } from './sim/util/noise';
 export {
   isDepot,
   canHire,
-  buildingName,
   buildingIcon,
   centerX,
   centerY,
   wagonLoad,
   lootCarried,
 } from './sim/world/entities';
-export { hasPerk, ultimateOf, roadLength, unitCost, buildCost } from './sim/modifiers';
+export {
+  hasPerk,
+  ultimateOf,
+  roadLength,
+  unitCost,
+  buildCost,
+} from './sim/modifiers';
 export { squadSize, soldierCount } from './sim/systems/squads';
 export { canAfford } from './sim/commands/build';
-
-// ---- display language ----
-/** Switch the language of rule tables, notices and bot names ('uk' default, 'en'). Display only. */
-export { setLang } from './sim/i18n';
-export type { Lang } from './sim/i18n';

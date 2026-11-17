@@ -10,7 +10,14 @@ import {
   Terrain,
   type TerrainCode,
 } from '../config/map';
-import { matchState, crystalFields, depositMap, siteAt, sites, terrainMap } from '../state';
+import {
+  matchState,
+  crystalFields,
+  depositMap,
+  siteAt,
+  sites,
+  terrainMap,
+} from '../state';
 import { dist, tileIndex, detCos, detSin, inBounds } from '../util/geometry';
 import { fbm } from '../util/noise';
 import { randomInt, rand } from '../util/rng';
@@ -24,8 +31,8 @@ export function genMap() {
   const s = matchState.seed % 10000;
   for (let y = 0; y < MAP_H; y++)
     for (let x = 0; x < MAP_W; x++) {
-      const h = fbm(x / 10, y / 10, s),
-        f = fbm(x / 6 + 50, y / 6 + 50, s + 7);
+      const h = fbm(x / 10, y / 10, s);
+      const f = fbm(x / 6 + 50, y / 6 + 50, s + 7);
       let t: TerrainCode = Terrain.Plain;
       if (h < 0.37) t = Terrain.Water;
       else if (h > 0.66) t = Terrain.Mountain;
@@ -33,23 +40,26 @@ export function genMap() {
       terrainMap[tileIndex(x, y)] = t;
       depositMap[tileIndex(x, y)] = 0;
     }
-  const cx = MAP_W >> 1,
-    cy = MAP_H >> 1;
+  const cx = MAP_W >> 1;
+  const cy = MAP_H >> 1;
   const a0 = rand() * Math.PI * 2;
   const starts: Tile[] = [];
   for (let i = 0; i < SEATS; i++) {
     const a = a0 + (i * Math.PI * 2) / SEATS + (rand() - 0.5) * 0.12;
-    starts.push([Math.round(cx + detCos(a) * (cx - 9)), Math.round(cy + detSin(a) * (cy - 8))]);
+    starts.push([
+      Math.round(cx + detCos(a) * (cx - 9)),
+      Math.round(cy + detSin(a) * (cy - 8)),
+    ]);
   }
   const carve = (x0: number, y0: number, x1: number, y1: number) => {
     const n = Math.ceil(dist(x0, y0, x1, y1));
     for (let i = 0; i <= n; i++) {
-      const x = Math.round(x0 + ((x1 - x0) * i) / n),
-        y = Math.round(y0 + ((y1 - y0) * i) / n);
+      const x = Math.round(x0 + ((x1 - x0) * i) / n);
+      const y = Math.round(y0 + ((y1 - y0) * i) / n);
       for (let dy = -1; dy <= 1; dy++)
         for (let dx = -1; dx <= 1; dx++) {
-          const X = x + dx,
-            Y = y + dy;
+          const X = x + dx;
+          const Y = y + dy;
           if (
             inBounds(X, Y) &&
             (terrainMap[tileIndex(X, Y)] === Terrain.Water ||
@@ -61,8 +71,8 @@ export function genMap() {
   };
   for (const [sx, sy] of starts) carve(sx, sy, cx, cy);
   for (let i = 0; i < SEATS; i++) {
-    const a = starts[i],
-      b = starts[(i + 1) % SEATS];
+    const a = starts[i];
+    const b = starts[(i + 1) % SEATS];
     carve(a[0], a[1], b[0], b[1]);
   }
   const patch = (x: number, y: number, kind: string, n: number) => {
@@ -75,7 +85,11 @@ export function genMap() {
         } else {
           terrainMap[k] = Terrain.Plain;
           depositMap[k] =
-            kind === 'ore' ? Deposit.Ore : kind === 'crystal' ? Deposit.Crystal : Deposit.Grain;
+            kind === 'ore'
+              ? Deposit.Ore
+              : kind === 'crystal'
+                ? Deposit.Crystal
+                : Deposit.Grain;
         }
       }
       x = Math.max(1, Math.min(MAP_W - 2, x + randomInt(-1, 1)));
@@ -90,8 +104,8 @@ export function genMap() {
           depositMap[tileIndex(sx + dx, sy + dy)] = 0;
         }
       }
-    const dx = Math.sign(cx - sx),
-      dy = Math.sign(cy - sy);
+    const dx = Math.sign(cx - sx);
+    const dy = Math.sign(cy - sy);
     patch(sx + dx * 4, sy - dy, 'ore', 5);
     patch(sx - dx, sy + dy * 4, 'grain', 6);
     patch(sx - dx * 3, sy - dy * 3, 'forest', 4);
@@ -99,11 +113,12 @@ export function genMap() {
     terrainMap[tileIndex(sx, sy)] = Terrain.Plain;
     depositMap[tileIndex(sx, sy)] = 0;
   }
-  const farFromStarts = (x: number, y: number) => starts.every(([a, b]) => dist(a, b, x, y) > 7);
+  const farFromStarts = (x: number, y: number) =>
+    starts.every(([a, b]) => dist(a, b, x, y) > 7);
   let k = 0;
   for (let t = 0; t < 1500 && k < 48; t++) {
-    const x = randomInt(2, MAP_W - 3),
-      y = randomInt(2, MAP_H - 3);
+    const x = randomInt(2, MAP_W - 3);
+    const y = randomInt(2, MAP_H - 3);
     if (walkable(x, y) && farFromStarts(x, y)) {
       patch(x, y, 'ore', randomInt(5, 8));
       k++;
@@ -111,8 +126,8 @@ export function genMap() {
   }
   k = 0;
   for (let t = 0; t < 1500 && k < 42; t++) {
-    const x = randomInt(2, MAP_W - 3),
-      y = randomInt(2, MAP_H - 3);
+    const x = randomInt(2, MAP_W - 3);
+    const y = randomInt(2, MAP_H - 3);
     if (terrainMap[tileIndex(x, y)] === Terrain.Plain && farFromStarts(x, y)) {
       patch(x, y, 'grain', randomInt(4, 6));
       k++;
@@ -124,11 +139,12 @@ export function genMap() {
   for (const [sx, sy] of starts) {
     const base = Math.atan2(cy - sy, cx - sx);
     for (let t = 0; t < 60; t++) {
-      const a = base + (rand() - 0.5) * 1.2,
-        r = randomInt(9, 11),
-        x = Math.round(sx + Math.cos(a) * r),
-        y = Math.round(sy + Math.sin(a) * r);
-      if (!inBounds(x, y) || !walkable(x, y) || depositMap[tileIndex(x, y)]) continue;
+      const a = base + (rand() - 0.5) * 1.2;
+      const r = randomInt(9, 11);
+      const x = Math.round(sx + Math.cos(a) * r);
+      const y = Math.round(sy + Math.sin(a) * r);
+      if (!inBounds(x, y) || !walkable(x, y) || depositMap[tileIndex(x, y)])
+        continue;
       patch(x, y, 'crystal', 3);
       break;
     }
@@ -138,8 +154,8 @@ export function genMap() {
   fields.length = 0;
   k = 0;
   for (let t = 0; t < 8000 && k < 7; t++) {
-    const x = randomInt(3, MAP_W - 4),
-      y = randomInt(3, MAP_H - 4);
+    const x = randomInt(3, MAP_W - 4);
+    const y = randomInt(3, MAP_H - 4);
     if (centreDist(x, y) > CENTRE_OVAL) continue;
     if (
       !walkable(x, y) ||
@@ -150,8 +166,8 @@ export function genMap() {
       continue;
     for (let dy = -1; dy <= 1; dy++)
       for (let dx = -1; dx <= 1; dx++) {
-        const X = x + dx,
-          Y = y + dy;
+        const X = x + dx;
+        const Y = y + dy;
         if (!walkable(X, Y)) continue;
         if (dx && dy && rand() < 0.4) continue;
         const kk = tileIndex(X, Y);
@@ -164,7 +180,8 @@ export function genMap() {
   genSites(starts);
   matchState.landTiles = 0;
   for (let k = 0; k < TILES; k++)
-    if (terrainMap[k] === Terrain.Plain || terrainMap[k] === Terrain.Forest) matchState.landTiles++;
+    if (terrainMap[k] === Terrain.Plain || terrainMap[k] === Terrain.Forest)
+      matchState.landTiles++;
   return starts;
 }
 
@@ -173,28 +190,34 @@ export function genSites(starts: Tile[]) {
   siteAt.fill(-1);
   const far = (x: number, y: number) =>
     starts.every(([a, b]) => dist(a, b, x, y) >= 11) &&
-    sites.every((s) => dist(s.x, s.y, x, y) >= 6);
-  const want: Record<SiteType, number> = { mine: 16, farm: 14, mill: 14, vein: 3 };
+    sites.every(s => dist(s.x, s.y, x, y) >= 6);
+  const want: Record<SiteType, number> = {
+    mine: 16,
+    farm: 14,
+    mill: 14,
+    vein: 3,
+  };
   // the three mana springs sit in the middle of big crystal fields
   for (const [x, y] of crystalFields) {
-    if (sites.filter((s) => s.type === 'vein').length >= want.vein) break;
+    if (sites.filter(s => s.type === 'vein').length >= want.vein) break;
     if (!far(x, y)) continue;
     siteAt[tileIndex(x, y)] = sites.length;
     sites.push({ type: 'vein', x, y, owner: -1, dep: 0 });
   }
   for (const type of ['mine', 'farm', 'mill', 'vein'] as const) {
-    let k = sites.filter((s) => s.type === type).length;
+    let k = sites.filter(s => s.type === type).length;
     for (let t = 0; t < 6000 && k < want[type]; t++) {
-      const x = randomInt(2, MAP_W - 3),
-        y = randomInt(2, MAP_H - 3),
-        i = tileIndex(x, y);
+      const x = randomInt(2, MAP_W - 3);
+      const y = randomInt(2, MAP_H - 3);
+      const i = tileIndex(x, y);
       const ok =
         type === 'mine'
           ? depositMap[i] === Deposit.Ore
           : type === 'farm'
             ? depositMap[i] === Deposit.Grain
             : type === 'vein'
-              ? depositMap[i] === Deposit.Crystal && centreDist(x, y) < CENTRE_OVAL
+              ? depositMap[i] === Deposit.Crystal &&
+                centreDist(x, y) < CENTRE_OVAL
               : terrainMap[i] === Terrain.Forest;
       if (!ok || !far(x, y)) continue;
       siteAt[i] = sites.length;

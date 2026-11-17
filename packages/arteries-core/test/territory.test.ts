@@ -8,8 +8,8 @@ const { MAP_W } = rules;
 describe('territory', () => {
   it('a new post never takes land that already belongs to another kingdom', () => {
     const game = createGame({ seed: 5, headless: true, humans: { 0: 'me' } });
-    const G = game.world,
-      h1 = G.players[1].hq;
+    const G = game.world;
+    const h1 = G.players[1].hq;
     const ownBy = (o: number) => {
       const s = new Set<number>();
       G.own.forEach((v, k) => {
@@ -24,22 +24,24 @@ describe('territory', () => {
     computeTerritory();
     const after = ownBy(1);
     for (const k of before)
-      expect(after.has(k), `tile ${k % MAP_W},${Math.floor(k / MAP_W)} stayed with its owner`).toBe(
-        true,
-      );
+      expect(
+        after.has(k),
+        `tile ${k % MAP_W},${Math.floor(k / MAP_W)} stayed with its owner`,
+      ).toBe(true);
     // the new post still gets the free land around it
     expect(
       [...ownBy(0)].some(
-        (k) =>
-          Math.abs((k % MAP_W) - (h1.x + 12)) < 2 && Math.abs(Math.floor(k / MAP_W) - h1.y) < 2,
+        k =>
+          Math.abs((k % MAP_W) - (h1.x + 12)) < 2 &&
+          Math.abs(Math.floor(k / MAP_W) - h1.y) < 2,
       ),
     ).toBe(true);
   });
 
   it('the older post keeps its land when the newer one is the neighbour', () => {
     const game = createGame({ seed: 8, headless: true, humans: { 0: 'me' } });
-    const G = game.world,
-      h = G.players[2].hq;
+    const G = game.world;
+    const h = G.players[2].hq;
     const a = addBuilding('depot', 3, h.x + 20, h.y);
     a.linked = true;
     computeTerritory();

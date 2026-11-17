@@ -1,13 +1,13 @@
 /** Squads: several soldiers of one type that walk and fight as one unit. */
-import type { Player, Unit, UnitType } from '../world/types';
+import type { GameMessage, Player, Unit, UnitType } from '../world/types';
 import { RESOURCES } from '../config/economy';
 import { HEAVY_UNITS } from '../config/units';
-import { loc } from '../i18n';
 import { G } from '../state';
 import { kill } from './combat';
 import { walkTo } from './movement';
 import { dist } from '../util/geometry';
 import { addUnit } from '../world/entities';
+import { msg } from '../world/events';
 
 export const squadSize = (type: UnitType) => (HEAVY_UNITS.has(type) ? 3 : 5);
 
@@ -38,8 +38,8 @@ export function mergeInto(b: Unit, a: Unit) {
   }
   if (a.n > room) {
     // hand over only what fits; the rest stays a smaller squad
-    const per = a.hp / a.n,
-      k = room;
+    const per = a.hp / a.n;
+    const k = room;
     b.ammo = (b.ammo * b.n + a.ammo * k) / (b.n + k);
     b.hp += per * k;
     b.n += k;
@@ -88,12 +88,18 @@ export function memberLoss(u: Unit, by: number) {
   else vs.starved += lost;
 }
 
-export function formSquads(p: Player, ids: number[], quiet?: boolean) {
+export function formSquads(
+  p: Player,
+  ids: number[],
+  quiet?: boolean,
+): GameMessage | null {
   const us = ids
-    .map((id) => G.byId.get(id))
-    .filter((u): u is Unit => !!u && !u.dead && u.kind === 'u' && u.owner === p.id)
+    .map(id => G.byId.get(id))
+    .filter(
+      (u): u is Unit => !!u && !u.dead && u.kind === 'u' && u.owner === p.id,
+    )
     .sort((a, b) => (b.n || 1) - (a.n || 1) || a.id - b.id);
-  const size = new Map(us.map((u) => [u.id, u.n || 1]));
+  const size = new Map(us.map(u => [u.id, u.n || 1]));
   let moved = 0;
   for (const u of us) {
     u.solo = false;
@@ -103,7 +109,12 @@ export function formSquads(p: Player, ids: number[], quiet?: boolean) {
     if (size.get(u.id) !== (u.n || 1)) continue;
     for (let k = 0; k < i; k++) {
       const t = us[k];
-      if (t.type !== u.type || !canJoin(u, t) || size.get(t.id)! >= squadSize(u.type)) continue;
+      if (
+        t.type !== u.type ||
+        !canJoin(u, t) ||
+        size.get(t.id)! >= squadSize(u.type)
+      )
+        continue;
       const give = Math.min(u.n || 1, squadSize(u.type) - size.get(t.id)!);
       size.set(t.id, size.get(t.id)! + give);
       size.set(u.id, (u.n || 1) - give);
@@ -116,25 +127,25 @@ export function formSquads(p: Player, ids: number[], quiet?: boolean) {
       break;
     }
   }
-  if (!moved)
-    return quiet
-      ? null
-      : loc(
-          'Для загону потрібно кілька однакових юнітів: до 5 легких або до 3 важких (требушети, големи, обози)',
-          'A squad needs several units of one type: up to 5 light or 3 heavy ones (trebuchets, golems, wagons)',
-        );
+  if (!moved) return quiet ? null : msg('error.squadNeedsSame');
   return null;
 }
 
-export function unsquad(p: Player, ids: number[]) {
+export function unsquad(p: Player, ids: number[]): GameMessage | null {
   let n = 0;
   for (const id of ids) {
     const u = G.byId.get(id);
-    if (!u || u.kind !== 'u' || u.dead || u.owner !== p.id || (u.n || 1) < 2) continue;
+    if (!u || u.kind !== 'u' || u.dead || u.owner !== p.id || (u.n || 1) < 2)
+      continue;
     const per = u.hp / u.n;
     for (let i = 1; i < u.n; i++) {
-      const a = i * 2.4,
-        m = addUnit(u.type, u.owner, u.x + Math.cos(a) * 0.6, u.y + Math.sin(a) * 0.6);
+      const a = i * 2.4;
+      const m = addUnit(
+        u.type,
+        u.owner,
+        u.x + Math.cos(a) * 0.6,
+        u.y + Math.sin(a) * 0.6,
+      );
       m.hp = Math.min(per, m.maxhp);
       m.ammo = u.ammo;
       m.solo = true;
@@ -147,7 +158,7 @@ export function unsquad(p: Player, ids: number[]) {
     u.joinTo = 0;
     n++;
   }
-  return n ? null : loc('Серед вибраних немає загонів', 'No squads among the selected units');
+  return n ? null : msg('error.noSquads');
 }
 
 export const isIdle = (u: Unit) =>
@@ -172,13 +183,18 @@ export function squadTick() {
   for (const p of G.players) {
     if (!p.alive || (p.ai && p.ai.P && p.ai.P.noSquad)) continue;
     const free = G.units.filter(
-      (u) => !u.dead && u.owner === p.id && !u.solo && !u.joinTo && (u.n || 1) < squadSize(u.type),
+      u =>
+        !u.dead &&
+        u.owner === p.id &&
+        !u.solo &&
+        !u.joinTo &&
+        (u.n || 1) < squadSize(u.type),
     );
     const used = new Set();
     for (const u of free) {
       if (used.has(u.id) || !isIdle(u)) continue;
-      let best = null,
-        bs = -1e9;
+      let best = null;
+      let bs = -1e9;
       for (const v of free) {
         if (v === u || used.has(v.id) || !canJoin(u, v)) continue;
         const d = dist(u.x, u.y, v.x, v.y);
@@ -192,9 +208,12 @@ export function squadTick() {
       }
       if (!best) continue;
       // the smaller group walks to the bigger one
-      let a = u,
-        b = best;
-      if ((a.n || 1) > (b.n || 1) || ((a.n || 1) === (b.n || 1) && a.id < b.id)) {
+      let a = u;
+      let b = best;
+      if (
+        (a.n || 1) > (b.n || 1) ||
+        ((a.n || 1) === (b.n || 1) && a.id < b.id)
+      ) {
         a = best;
         b = u;
       }

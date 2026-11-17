@@ -1,6 +1,7 @@
 /** Player intents: validated orders turned into calls of the systems. */
 import type {
   Building,
+  GameMessage,
   PathId,
   PingKind,
   SayKind,
@@ -11,7 +12,6 @@ import type {
 import type { GiftResource, Intent } from '@caspen13/arteries-protocol';
 import { build, specialize, train } from './build';
 import { UNITS } from '../config/units';
-import { loc } from '../i18n';
 import { G } from '../state';
 import {
   breakAlly,
@@ -27,25 +27,32 @@ import { orderAttack, orderMove } from '../systems/movement';
 import { cast, choosePath, pickPerk } from '../systems/paths';
 import { formSquads, unsquad } from '../systems/squads';
 import { canHire } from '../world/entities';
-import { notifyAll } from '../world/events';
+import { msg, notifyAll } from '../world/events';
 
 /** Apply one intent of a seat. Returns a message for the player when it was refused, else null. */
-export function applyCommand(seat: number, c: Intent): string | null {
+export function applyCommand(seat: number, c: Intent): GameMessage | null {
   const p = G.players[seat];
-  if (!p || !p.alive || !c || typeof c !== 'object') return loc('Ти вибув', 'You are out');
+  if (!p || !p.alive || !c || typeof c !== 'object') return msg('error.out');
   const mine = (ids: unknown) =>
     (Array.isArray(ids) ? ids : [])
       .slice(0, 250)
-      .map((id) => G.byId.get(id))
-      .filter((u): u is Unit => !!u && !u.dead && u.kind === 'u' && u.owner === seat);
+      .map(id => G.byId.get(id))
+      .filter(
+        (u): u is Unit => !!u && !u.dead && u.kind === 'u' && u.owner === seat,
+      );
   switch (c.t) {
     case 'move':
-      orderMove(mine(c.ids), c.x | 0, c.y | 0, c.mode === 'move' ? 'move' : 'amove');
+      orderMove(
+        mine(c.ids),
+        c.x | 0,
+        c.y | 0,
+        c.mode === 'move' ? 'move' : 'amove',
+      );
       return null;
     case 'attack': {
       const e = G.byId.get(c.target);
       if (e && !e.dead && hostile(seat, e.owner)) orderAttack(mine(c.ids), e);
-      else if (e && !e.dead && e.owner !== seat) return loc('Це союзник', 'That is an ally');
+      else if (e && !e.dead && e.owner !== seat) return msg('error.ally');
       return null;
     }
     case 'stop':
@@ -65,13 +72,18 @@ export function applyCommand(seat: number, c: Intent): string | null {
         UNITS[c.type] ? c.type : 'inf',
         p.spawn ? (G.byId.get(p.spawn) as Building | undefined) : null,
       );
-      return typeof r === 'string' ? r : null;
+      return 'key' in r ? r : null;
     }
     case 'spec':
-      return specialize(p, G.byId.get(c.b) as Building | undefined, String(c.s) as SpecType);
+      return specialize(
+        p,
+        G.byId.get(c.b) as Building | undefined,
+        String(c.s) as SpecType,
+      );
     case 'spawn': {
       const b = G.byId.get(c.b);
-      if (b && !b.dead && b.owner === seat && b.kind === 'b' && canHire(b)) p.spawn = b.id;
+      if (b && !b.dead && b.owner === seat && b.kind === 'b' && canHire(b))
+        p.spawn = b.id;
       return null;
     }
     case 'auto':
@@ -94,7 +106,11 @@ export function applyCommand(seat: number, c: Intent): string | null {
     case 'gift':
       return giftAlly(p, c.to | 0, String(c.res) as GiftResource);
     case 'trade':
-      return trade(p, String(c.from) as TradeResource, String(c.to) as TradeResource);
+      return trade(
+        p,
+        String(c.from) as TradeResource,
+        String(c.to) as TradeResource,
+      );
     case 'ping':
       return ping(p, +c.x || 0, +c.y || 0, String(c.k) as PingKind);
     case 'perk':
@@ -104,12 +120,7 @@ export function applyCommand(seat: number, c: Intent): string | null {
     case 'leave':
       p.bot = true;
       p.auto = false;
-      notifyAll(
-        loc(
-          `${p.name} вийшов — його армією керує бот`,
-          `${p.name} left: a bot now leads that army`,
-        ),
-      );
+      notifyAll(msg('notice.left', { player: p.id }));
       return null;
   }
   return null;

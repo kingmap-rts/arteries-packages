@@ -10,8 +10,8 @@ import { G, matchState } from './state';
 const PATH_IDS = Object.keys(PATHS);
 
 export function stateHash(): string {
-  const f = new Float64Array(1),
-    b = new Uint8Array(f.buffer);
+  const f = new Float64Array(1);
+  const b = new Uint8Array(f.buffer);
   let h = 0x811c9dc5;
   const num = (v: number) => {
     f[0] = v;

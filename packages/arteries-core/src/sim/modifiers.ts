@@ -18,7 +18,8 @@ import { G } from './state';
 export const hasPerk = (p: Player | null | undefined, id: PerkId) =>
   !!p && p.perks && p.perks.includes(id);
 
-export const ultimateOf = (p: Player) => (p && p.perks && p.perks.length >= 3 ? p.perks[2] : null);
+export const ultimateOf = (p: Player) =>
+  p && p.perks && p.perks.length >= 3 ? p.perks[2] : null;
 
 export const roadLength = (p: Player | null | undefined) =>
   ROAD_LEN + (p && p.doc === 'guild' ? 2 : 0);
@@ -26,12 +27,15 @@ export const roadLength = (p: Player | null | undefined) =>
 export const claimRadius = (b: Building) =>
   POST_RADIUS + (G.players[b.owner].doc === 'land' ? 1 : 0) + (b.rBonus || 0);
 
-export const siteWorkers = (p: Player) => (hasPerk(p, 'labor') ? 2 : SITE_WORKERS);
+export const siteWorkers = (p: Player) =>
+  hasPerk(p, 'labor') ? 2 : SITE_WORKERS;
 
-export const arsonTime = (att: Player) => (att && att.doc === 'shadow' ? 4 : ARSON_TIME);
+export const arsonTime = (att: Player) =>
+  att && att.doc === 'shadow' ? 4 : ARSON_TIME;
 
 export const burnTime = (att: Player, def: Player) =>
-  (hasPerk(att, 'burn60') ? 60 : BURN_TIME) * (hasPerk(def, 'repair') ? 0.5 : 1);
+  (hasPerk(att, 'burn60') ? 60 : BURN_TIME) *
+  (hasPerk(def, 'repair') ? 0.5 : 1);
 
 export const forgeBonus = (p: Player) => (p.doc === 'forge' ? 1.6 : 1);
 
@@ -52,12 +56,19 @@ export const ammoMax = (u: Unit) =>
 
 export function buildCost(p: Player, type: BuildingType) {
   const c = BUILDINGS[type];
-  return hasPerk(p, 'cheap') ? { wood: c.wood! * 0.7, steel: c.steel! * 0.7 } : c;
+  return hasPerk(p, 'cheap')
+    ? { wood: c.wood! * 0.7, steel: c.steel! * 0.7 }
+    : c;
 }
 
 export function unitCost(p: Player, type: UnitType) {
   const S = UNITS[type];
   if (type === 'siege' && hasPerk(p, 'cheapsiege'))
-    return { steel: S.steel * 0.75, wood: S.wood * 0.75, food: S.food, pop: S.pop };
+    return {
+      steel: S.steel * 0.75,
+      wood: S.wood * 0.75,
+      food: S.food,
+      pop: S.pop,
+    };
   return S;
 }

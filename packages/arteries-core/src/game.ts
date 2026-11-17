@@ -1,4 +1,8 @@
-import type { Difficulty, Intent } from '@caspen13/arteries-protocol';
+import type {
+  Difficulty,
+  GameMessage,
+  Intent,
+} from '@caspen13/arteries-protocol';
 import { DEFAULT_BOT_PARAMS } from './sim/config/ai';
 import { MAP_H, MAP_W } from './sim/config/map';
 import { buildCheck } from './sim/commands/build';
@@ -9,7 +13,14 @@ import { allied, allyIds, hostile, pactOf } from './sim/systems/diplomacy';
 import { update } from './sim/update';
 import { nearestLinkedDepot } from './sim/world/entities';
 import { newGame } from './sim/world/new-game';
-import type { BotParams, Building, Match, Pact, Site, World } from './sim/world/types';
+import type {
+  BotParams,
+  Building,
+  Match,
+  Pact,
+  Site,
+  World,
+} from './sim/world/types';
 
 /** Fixed simulation tick in seconds. Every client steps with exactly this value (= TURN_MS). */
 export const TICK = 0.1;
@@ -17,7 +28,7 @@ export const TICK = 0.1;
 export interface GameOptions {
   seed: number;
   diff?: Difficulty;
-  /** seat -> display name for human players; every other seat is a bot (default: seat 0 is a human) */
+  /** seat -> nick of a human player; every other seat is a bot with no name (default: seat 0 is a human, nick '') */
   humans?: Record<number, string>;
   /** headless batch run (balance tools, server checks): no notices, a little faster */
   headless?: boolean;
@@ -60,7 +71,7 @@ export class Game {
   constructor(o: GameOptions) {
     this.seed = o.seed;
     this.diff = o.diff ?? 1;
-    newGame(this.diff, { seed: o.seed, humans: o.humans ?? { 0: 'Ти' } });
+    newGame(this.diff, { seed: o.seed, humans: o.humans ?? { 0: '' } });
     this.match = matchState;
     const G = this.match.world;
     if (o.headless) G.sim = true;
@@ -102,8 +113,8 @@ export class Game {
     if (!this.match.world.over) update(TICK);
   }
 
-  /** Apply one intent of a seat. Returns a message for the player when it was refused, else null. */
-  apply(seat: number, intent: Intent): string | null {
+  /** Apply one intent of a seat. Returns why it was refused (a message key for the client to translate), else null. */
+  apply(seat: number, intent: Intent): GameMessage | null {
     this.use();
     return applyCommand(seat, intent);
   }
@@ -116,11 +127,16 @@ export class Game {
 
   result(): GameResult {
     const G = this.match.world;
-    return { over: G.over, winner: G.winner ?? null, reason: G.reason ?? null, t: G.t };
+    return {
+      over: G.over,
+      winner: G.winner ?? null,
+      reason: G.reason ?? null,
+      t: G.t,
+    };
   }
 
-  /** Take the notices waiting for the players: [seat, text]. */
-  drainNotices(): [number, string][] {
+  /** Take the notices waiting for the players: [seat, message] (the client translates the message). */
+  drainNotices(): [number, GameMessage][] {
     const G = this.match.world;
     const n = G.notices;
     G.notices = [];
@@ -130,7 +146,7 @@ export class Game {
   // ---- questions the UI asks (never change the world) ----
 
   /** Why this seat cannot put a trading post on this tile, or null when it can. */
-  buildError(seat: number, x: number, y: number): string | null {
+  buildError(seat: number, x: number, y: number): GameMessage | null {
     this.use();
     return buildCheck(this.match.world.players[seat], 'depot', x, y);
   }

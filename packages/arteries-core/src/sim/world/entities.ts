@@ -1,5 +1,13 @@
 /** Creating buildings, units and caravans, and small queries about them. */
-import type { Bag, Building, BuildingType, Convoy, Entity, Unit, UnitType } from './types';
+import type {
+  Bag,
+  Building,
+  BuildingType,
+  Convoy,
+  Entity,
+  Unit,
+  UnitType,
+} from './types';
 import { BUILDINGS, POST_SPECS } from '../config/buildings';
 import { UNITS } from '../config/units';
 import { hasPerk } from '../modifiers';
@@ -11,7 +19,12 @@ import { rand } from '../util/rng';
 export const linkKey = (a: { id: number }, b: { id: number }) =>
   a.id < b.id ? a.id + '_' + b.id : b.id + '_' + a.id;
 
-export function addBuilding(type: BuildingType, owner: number, x: number, y: number) {
+export function addBuilding(
+  type: BuildingType,
+  owner: number,
+  x: number,
+  y: number,
+) {
   const b: Building = {
     id: G.nextId++,
     kind: 'b',
@@ -105,21 +118,19 @@ export function addConvoy(from: Building, to: Building, cargo: Bag) {
 
 export const isDepot = (b: Building) => b.type === 'hq' || b.type === 'depot';
 
-export const canHire = (b: Building) => b.type === 'hq' || b.spec === 'barracks';
+export const canHire = (b: Building) =>
+  b.type === 'hq' || b.spec === 'barracks';
 
 export const buildingIcon = (b: Building) =>
   b.spec ? POST_SPECS[b.spec].icon : BUILDINGS[b.type].icon;
-
-export const buildingName = (b: Building) =>
-  b.spec ? POST_SPECS[b.spec].name : BUILDINGS[b.type].name;
 
 export const centerX = (e: Entity) => (e.kind === 'b' ? e.x + 0.5 : e.x);
 
 export const centerY = (e: Entity) => (e.kind === 'b' ? e.y + 0.5 : e.y);
 
 export function nearestLinkedDepot(owner: number, x: number, y: number) {
-  let best = null,
-    bd = 1e9;
+  let best = null;
+  let bd = 1e9;
   for (const b of G.buildings) {
     if (b.dead || b.owner !== owner || !isDepot(b) || !b.linked) continue;
     const d = dist(b.x, b.y, x, y);
@@ -131,15 +142,21 @@ export function nearestLinkedDepot(owner: number, x: number, y: number) {
   return best;
 }
 
-export const wagonLoad = (u: Unit) => (u.cargo ? u.cargo.steel + u.cargo.food : 0);
+export const wagonLoad = (u: Unit) =>
+  u.cargo ? u.cargo.steel + u.cargo.food : 0;
 
 export function lootCarried(u: Unit) {
   return u.bag ? goodsTotal(u.bag) : 0;
 }
 
-export function nearest<T extends Entity>(list: T[], x: number, y: number, r: number): T | null {
-  let best: T | null = null,
-    bd = r;
+export function nearest<T extends Entity>(
+  list: T[],
+  x: number,
+  y: number,
+  r: number,
+): T | null {
+  let best: T | null = null;
+  let bd = r;
   for (const e of list) {
     const d = dist(centerX(e), centerY(e), x, y);
     if (d < bd) {

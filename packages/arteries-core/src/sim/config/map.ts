@@ -1,4 +1,4 @@
-/** Map size, terrain and deposit codes, realm colours and names. */
+/** Map size, terrain and deposit codes and realm colours (the client names the realms). */
 import { MAX_PLAYERS } from '@caspen13/arteries-protocol';
 
 /** seats on the ring of start positions (people + bots) */
@@ -32,19 +32,6 @@ export const COLORS = [
   '#f4f1e8',
   '#2b2f3a',
   '#8b5a2b',
-];
-
-export const NAMES = [
-  'Ти',
-  'Королівство Ельмор',
-  'Князівство Варн',
-  'Гномячий Кряж',
-  'Ельфійський Доль',
-  'Орден Ворона',
-  'Вільні Міста',
-  'Степові Хани',
-  'Морська Гільдія',
-  'Болотяні Клани',
 ];
 
 export const CENTRE_OVAL = 0.34;

@@ -34,15 +34,15 @@ export function heapPush(k: number, v: number) {
 
 export function heapPop() {
   const top = heapKeys[0];
-  const lk = heapKeys.pop()!,
-    lv = heapVals.pop()!;
+  const lk = heapKeys.pop()!;
+  const lv = heapVals.pop()!;
   if (heapKeys.length) {
     heapKeys[0] = lk;
     heapVals[0] = lv;
     let i = 0;
     for (;;) {
-      const l = 2 * i + 1,
-        r = l + 1;
+      const l = 2 * i + 1;
+      const r = l + 1;
       let m = i;
       if (l < heapKeys.length && heapVals[l] < heapVals[m]) m = l;
       if (r < heapKeys.length && heapVals[r] < heapVals[m]) m = r;
@@ -60,8 +60,8 @@ export function nearestPass(x: number, y: number): Tile | null {
   y = Math.max(0, Math.min(MAP_H - 1, y | 0));
   if (walkable(x, y)) return [x, y];
   for (let r = 1; r < 8; r++) {
-    let best: Tile | null = null,
-      bd = 1e9;
+    let best: Tile | null = null;
+    let bd = 1e9;
     for (let dy = -r; dy <= r; dy++)
       for (let dx = -r; dx <= r; dx++) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
@@ -89,14 +89,19 @@ export const NEIGHBOURS = [
   [-1, -1, 1.414],
 ];
 
-export function findPath(sx: number, sy: number, tx: number, ty: number): Tile[] | null {
-  const s = nearestPass(sx, sy),
-    t = nearestPass(tx, ty);
+export function findPath(
+  sx: number,
+  sy: number,
+  tx: number,
+  ty: number,
+): Tile[] | null {
+  const s = nearestPass(sx, sy);
+  const t = nearestPass(tx, ty);
   if (!s || !t) return null;
   [sx, sy] = s;
   [tx, ty] = t;
-  const si = tileIndex(sx, sy),
-    ti = tileIndex(tx, ty);
+  const si = tileIndex(sx, sy);
+  const ti = tileIndex(tx, ty);
   if (si === ti) return [[tx, ty]];
   searchNo++;
   heapKeys.length = 0;
@@ -105,8 +110,8 @@ export function findPath(sx: number, sy: number, tx: number, ty: number): Tile[]
   seenIn[si] = searchNo;
   cameFrom[si] = -1;
   heapPush(si, 0);
-  let it = 0,
-    found = false;
+  let it = 0;
+  let found = false;
   while (heapKeys.length && it++ < 24000) {
     const cur = heapPop();
     if (cur === ti) {
@@ -115,22 +120,24 @@ export function findPath(sx: number, sy: number, tx: number, ty: number): Tile[]
     }
     if (closedIn[cur] === searchNo) continue;
     closedIn[cur] = searchNo;
-    const cx = cur % MAP_W,
-      cy = (cur / MAP_W) | 0;
+    const cx = cur % MAP_W;
+    const cy = (cur / MAP_W) | 0;
     for (const [dx, dy, c] of NEIGHBOURS) {
-      const nx = cx + dx,
-        ny = cy + dy;
+      const nx = cx + dx;
+      const ny = cy + dy;
       if (!walkable(nx, ny)) continue;
-      if (dx && dy && (!walkable(cx + dx, cy) || !walkable(cx, cy + dy))) continue;
+      if (dx && dy && (!walkable(cx + dx, cy) || !walkable(cx, cy + dy)))
+        continue;
       const ni = tileIndex(nx, ny);
       if (closedIn[ni] === searchNo) continue;
-      const ng = gScore[cur] + c * (terrainMap[ni] === Terrain.Forest ? 1.3 : 1);
+      const ng =
+        gScore[cur] + c * (terrainMap[ni] === Terrain.Forest ? 1.3 : 1);
       if (seenIn[ni] !== searchNo || ng < gScore[ni]) {
         seenIn[ni] = searchNo;
         gScore[ni] = ng;
         cameFrom[ni] = cur;
-        const ax = Math.abs(nx - tx),
-          ay = Math.abs(ny - ty);
+        const ax = Math.abs(nx - tx);
+        const ay = Math.abs(ny - ty);
         heapPush(ni, ng + Math.max(ax, ay) + 0.414 * Math.min(ax, ay));
       }
     }

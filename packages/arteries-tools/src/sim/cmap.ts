@@ -12,8 +12,8 @@ const { Terrain, Deposit } = rules;
 let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * S}" height="${H * S}"><rect width="100%" height="100%" fill="#7a9a5a"/>`;
 for (let y = 0; y < H; y++)
   for (let x = 0; x < W; x++) {
-    const t = terrain[y * W + x],
-      d = deposits[y * W + x];
+    const t = terrain[y * W + x];
+    const d = deposits[y * W + x];
     const c =
       t === Terrain.Water
         ? '#3a6ea5'
@@ -22,7 +22,8 @@ for (let y = 0; y < H; y++)
           : t === Terrain.Forest
             ? '#3d6b35'
             : null;
-    if (c) svg += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="${c}"/>`;
+    if (c)
+      svg += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="${c}"/>`;
     if (d === Deposit.Crystal)
       svg += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="#3fd0ff"/>`;
   }

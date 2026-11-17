@@ -14,11 +14,17 @@ import {
 } from './config/economy';
 import { SEATS } from './config/map';
 import { AMMO_COST, UNITS, WAGON_FOOD } from './config/units';
-import { loc } from './i18n';
-import { ammoMax, convoySpeed, deployTime, forgeBonus, hasPerk, yieldBonus } from './modifiers';
+import {
+  ammoMax,
+  convoySpeed,
+  deployTime,
+  forgeBonus,
+  hasPerk,
+  yieldBonus,
+} from './modifiers';
 import { G } from './state';
 import { acquireTarget, fire, hit, kill } from './systems/combat';
-import { diploTick, giftText, hostile } from './systems/diplomacy';
+import { diploTick, hostile } from './systems/diplomacy';
 import { banditLoot, sendCaravan, wagonTick } from './systems/logistics';
 import { followPath, moveToward } from './systems/movement';
 import { recomputeNetwork } from './systems/network';
@@ -31,7 +37,7 @@ import { dist, vecLen } from './util/geometry';
 import { goodsTotal } from './util/resources';
 import { rand } from './util/rng';
 import { centerX, centerY, isDepot } from './world/entities';
-import { notify, snapshot } from './world/events';
+import { msg, notify, snapshot } from './world/events';
 import { walkable } from './world/terrain';
 
 export function update(dt: number) {
@@ -72,7 +78,11 @@ export function update(dt: number) {
     } else p.hungry = false;
     if (tot < p.cap) {
       if (!p.hungry && p.res.food > 0.5)
-        p.pop += (0.25 + 0.015 * p.pop) * (1 - tot / p.cap) * dt * (hasPerk(p, 'growth') ? 1.5 : 1);
+        p.pop +=
+          (0.25 + 0.015 * p.pop) *
+          (1 - tot / p.cap) *
+          dt *
+          (hasPerk(p, 'growth') ? 1.5 : 1);
     } else {
       p.pop = Math.max(0, p.pop - (0.3 + (tot - p.cap) * 0.03) * dt);
     }
@@ -84,8 +94,10 @@ export function update(dt: number) {
   for (const p of G.players) {
     if (!p.alive) continue;
     let nd = 0;
-    for (const b of G.buildings) if (!b.dead && b.owner === p.id && isDepot(b) && b.linked) nd++;
-    p.store = (STORE_BASE + STORE_PER_DEPOT * nd) * (hasPerk(p, 'granary') ? 1.5 : 1);
+    for (const b of G.buildings)
+      if (!b.dead && b.owner === p.id && isDepot(b) && b.linked) nd++;
+    p.store =
+      (STORE_BASE + STORE_PER_DEPOT * nd) * (hasPerk(p, 'granary') ? 1.5 : 1);
     for (const k of RESOURCES)
       if (p.res[k] > p.store) {
         p.stats.wasted += p.res[k] - p.store;
@@ -100,7 +112,7 @@ export function update(dt: number) {
     snapshot();
     for (const p of G.players) {
       if (!p.alive) continue;
-      const nd = G.buildings.filter((b) => b.owner === p.id).length;
+      const nd = G.buildings.filter(b => b.owner === p.id).length;
       if (nd > p.stats.peakDepots) p.stats.peakDepots = nd;
     }
   }
@@ -113,11 +125,12 @@ export function update(dt: number) {
     if (b.spec === 'fort' || b.type === 'hq') {
       b.cd -= dt;
       if (b.cd <= 0) {
-        let best = null,
-          bd = 3.6;
+        let best = null;
+        let bd = 3.6;
         for (const u of G.units) {
           if (u.dead || !hostile(b.owner, u.owner)) continue;
-          if (Math.abs(u.x - b.x - 0.5) > bd || Math.abs(u.y - b.y - 0.5) > bd) continue;
+          if (Math.abs(u.x - b.x - 0.5) > bd || Math.abs(u.y - b.y - 0.5) > bd)
+            continue;
           const d = dist(u.x, u.y, b.x + 0.5, b.y + 0.5);
           if (d < bd) {
             bd = d;
@@ -132,11 +145,13 @@ export function update(dt: number) {
     }
     if (!b.linked) continue;
     if (b.type === 'hq') {
-      for (const k of RESOURCES) p.res[k] += b.yld[k] * p.mult * p.eff * yieldBonus(p, k) * dt;
+      for (const k of RESOURCES)
+        p.res[k] += b.yld[k] * p.mult * p.eff * yieldBonus(p, k) * dt;
       continue;
     }
     if (goodsTotal(b.stock) < STOCK_CAP)
-      for (const k of RESOURCES) b.stock[k] += b.yld[k] * p.mult * p.eff * yieldBonus(p, k) * dt;
+      for (const k of RESOURCES)
+        b.stock[k] += b.yld[k] * p.mult * p.eff * yieldBonus(p, k) * dt;
     if (b.spec === 'forge') {
       const c = Math.min(b.stock.ore, FORGE_RATE * forgeBonus(p) * dt);
       b.stock.ore -= c;
@@ -153,14 +168,18 @@ export function update(dt: number) {
   for (const c of G.convoys) {
     if (c.dead) continue;
     const nb = G.byId.get(c.to) as Building | undefined;
-    if (!nb || nb.dead || nb.owner !== (c.giftTo != null ? c.giftTo : c.owner)) {
+    if (
+      !nb ||
+      nb.dead ||
+      nb.owner !== (c.giftTo != null ? c.giftTo : c.owner)
+    ) {
       kill(c);
       continue;
     }
-    const tx = nb.x + 0.5,
-      ty = nb.y + 0.5,
-      d = dist(c.x, c.y, tx, ty),
-      st = CONVOY_SPEED * convoySpeed(c) * dt;
+    const tx = nb.x + 0.5;
+    const ty = nb.y + 0.5;
+    const d = dist(c.x, c.y, tx, ty);
+    const st = CONVOY_SPEED * convoySpeed(c) * dt;
     if (c.doom && d < c.L0! * 0.5) {
       G.fx.push({ x: c.x, y: c.y, t: 0, dur: 0.8, r: 1, color: '#ff7b3d' });
       kill(c, false, c.doom - 1);
@@ -175,14 +194,17 @@ export function update(dt: number) {
       const q = G.players[c.giftTo];
       for (const k of RESOURCES) q.res[k] += c.cargo[k];
       q.stats.giftsGot += goodsTotal(c.cargo);
+      // a gift carries one resource
+      const res = RESOURCES.find(k => c.cargo[k] > 0) ?? 'wood';
       notify(
         q.id,
-        loc(
-          `Караван від ${G.players[c.owner].name} прибув: +${giftText(c.cargo)}`,
-          `A caravan from ${G.players[c.owner].name} arrived: +${giftText(c.cargo)}`,
-        ),
+        msg('notice.giftArrived', {
+          player: c.owner,
+          amount: Math.round(c.cargo[res]),
+          res,
+        }),
       );
-      notify(c.owner, loc(`Твій подарунок дійшов до ${q.name}`, `Your gift reached ${q.name}`));
+      notify(c.owner, msg('notice.giftDelivered', { player: q.id }));
     } else if (nb.type === 'hq') {
       const p = G.players[c.owner];
       for (const k of RESOURCES) p.res[k] += c.cargo[k];
@@ -211,7 +233,11 @@ export function update(dt: number) {
       p.pop - 1 >= p.labor * 0.8 &&
       canAfford(p, UNITS[type])
     ) {
-      train(p, type, p.spawn ? (G.byId.get(p.spawn) as Building | undefined) : null);
+      train(
+        p,
+        type,
+        p.spawn ? (G.byId.get(p.spawn) as Building | undefined) : null,
+      );
     }
   }
   // units
@@ -233,10 +259,10 @@ export function update(dt: number) {
       if (u.dest) u.path = findPath(u.x | 0, u.y | 0, u.dest[0], u.dest[1]);
     }
     if (t) {
-      const tx = centerX(t),
-        ty = centerY(t),
-        d = dist(u.x, u.y, tx, ty),
-        rr = S.range + (t.kind === 'b' ? 0.45 : 0);
+      const tx = centerX(t);
+      const ty = centerY(t);
+      const d = dist(u.x, u.y, tx, ty);
+      const rr = S.range + (t.kind === 'b' ? 0.45 : 0);
       if (d <= rr) {
         if (u.cd <= 0 && (!S.deploy || u.deployT >= deployTime(u))) fire(u, t);
         u.ang = Math.atan2(ty - u.y, tx - u.x);
@@ -282,11 +308,19 @@ export function update(dt: number) {
       if (G.t - u.lastHit > 3 && u.hp < u.maxhp)
         u.hp = Math.min(u.maxhp, u.hp + 0.8 * (u.n || 1) * dt);
       const w = u.supBy ? (G.byId.get(u.supBy) as Unit | undefined) : null;
-      if (w && !w.dead && w.cargo) w.cargo.food = Math.max(0, w.cargo.food - WAGON_FOOD * dt);
+      if (w && !w.dead && w.cargo)
+        w.cargo.food = Math.max(0, w.cargo.food - WAGON_FOOD * dt);
       if (u.ammo < ammoMax(u)) {
         const p = G.players[u.owner];
-        const amt = Math.min((u.type === 'siege' ? 0.6 : 3) * dt, ammoMax(u) - u.ammo),
-          cost = amt * (S.ammoCost || AMMO_COST) * (hasPerk(p, 'ammo') ? 0.5 : 1) * (u.n || 1);
+        const amt = Math.min(
+          (u.type === 'siege' ? 0.6 : 3) * dt,
+          ammoMax(u) - u.ammo,
+        );
+        const cost =
+          amt *
+          (S.ammoCost || AMMO_COST) *
+          (hasPerk(p, 'ammo') ? 0.5 : 1) *
+          (u.n || 1);
         if (w && !w.dead && w.cargo) {
           if (w.cargo.steel >= cost) {
             w.cargo.steel -= cost;
@@ -307,15 +341,15 @@ export function update(dt: number) {
     for (let j = i + 1; j < us.length; j++) {
       const b = us[j];
       if (b.dead) continue;
-      const dx = b.x - a.x,
-        dy = b.y - a.y,
-        rr = (a.n > 1 ? 0.5 : 0.275) + (b.n > 1 ? 0.5 : 0.275);
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const rr = (a.n > 1 ? 0.5 : 0.275) + (b.n > 1 ? 0.5 : 0.275);
       if (Math.abs(dx) > rr || Math.abs(dy) > rr) continue;
       const d = vecLen(dx, dy) || 0.01;
       if (d < rr) {
-        const push = (rr - d) * 0.5,
-          px = (dx / d) * push,
-          py = (dy / d) * push;
+        const push = (rr - d) * 0.5;
+        const px = (dx / d) * push;
+        const py = (dy / d) * push;
         if (walkable((a.x - px) | 0, (a.y - py) | 0)) {
           a.x -= px;
           a.y -= py;
@@ -328,9 +362,9 @@ export function update(dt: number) {
     }
   }
   for (const s of G.shots) s.t -= dt;
-  G.shots = G.shots.filter((s) => s.t > 0);
+  G.shots = G.shots.filter(s => s.t > 0);
   for (const f of G.fx) f.t += dt;
-  G.fx = G.fx.filter((f) => f.t < f.dur);
+  G.fx = G.fx.filter(f => f.t < f.dur);
   for (const p of G.players) {
     if (!p.bot || !p.alive) continue;
     p.ai.next -= dt;
@@ -339,16 +373,16 @@ export function update(dt: number) {
       botTick(p);
     }
   }
-  if (G.units.some((u) => u.dead)) {
+  if (G.units.some(u => u.dead)) {
     for (const u of G.units) if (u.dead) G.byId.delete(u.id);
-    G.units = G.units.filter((u) => !u.dead);
+    G.units = G.units.filter(u => !u.dead);
   }
-  if (G.convoys.some((c) => c.dead)) {
+  if (G.convoys.some(c => c.dead)) {
     for (const c of G.convoys) if (c.dead) G.byId.delete(c.id);
-    G.convoys = G.convoys.filter((c) => !c.dead);
+    G.convoys = G.convoys.filter(c => !c.dead);
   }
-  if (G.buildings.some((b) => b.dead)) {
+  if (G.buildings.some(b => b.dead)) {
     for (const b of G.buildings) if (b.dead) G.byId.delete(b.id);
-    G.buildings = G.buildings.filter((b) => !b.dead);
+    G.buildings = G.buildings.filter(b => !b.dead);
   }
 }

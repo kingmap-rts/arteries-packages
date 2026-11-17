@@ -7,6 +7,7 @@
 import type {
   BuildingType,
   Difficulty,
+  GameMessage,
   PathId,
   PerkId,
   PingKind,
@@ -19,6 +20,7 @@ import type {
 export type {
   BuildingType,
   Difficulty,
+  GameMessage,
   GiftResource,
   PathId,
   PerkId,
@@ -271,6 +273,7 @@ export interface PlayerStats {
 export interface Player {
   id: number;
   color: string;
+  /** the nick of a human seat ('' for bots: the client names realms); never read by the simulation */
   name: string;
   bot: boolean;
   /** human player let the game hire troops automatically */
@@ -414,8 +417,8 @@ export interface World {
   domWinner?: number;
   /** headless batch run: no notices */
   sim: boolean;
-  /** [seat, text] for the UI, drained by the client */
-  notices: [number, string][];
+  /** [seat, message] for the UI, drained by the client (which translates the message) */
+  notices: [number, GameMessage][];
   events: MatchEvent[];
   timeline: { t: number; pl: (number[] | null)[] }[];
   matchId: string;

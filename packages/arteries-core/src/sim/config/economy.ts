@@ -1,9 +1,21 @@
 /** Resources, yields, caravans, food, storage, forging and the market. */
 import type { Resource, TradeResource } from '../world/types';
 
-export const RESOURCES: Resource[] = ['wood', 'ore', 'steel', 'food', 'crystal'];
+export const RESOURCES: Resource[] = [
+  'wood',
+  'ore',
+  'steel',
+  'food',
+  'crystal',
+];
 /** loading order of caravans and loot bags: the most valuable first */
-export const LOAD_ORDER: Resource[] = ['crystal', 'steel', 'food', 'ore', 'wood'];
+export const LOAD_ORDER: Resource[] = [
+  'crystal',
+  'steel',
+  'food',
+  'ore',
+  'wood',
+];
 
 export const RESOURCE_COLORS: Record<Resource, string> = {
   wood: '#b5793f',

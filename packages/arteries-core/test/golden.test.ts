@@ -22,7 +22,8 @@ describe(`golden matches (${fixture.recordedWith})`, () => {
         for (const [n, seat, it] of sc.intents)
           intents.set(n, [...(intents.get(n) ?? []), [seat, it]]);
         const events = new Map<number, [string, any][]>();
-        for (const [n, kind, v] of sc.events) events.set(n, [...(events.get(n) ?? []), [kind, v]]);
+        for (const [n, kind, v] of sc.events)
+          events.set(n, [...(events.get(n) ?? []), [kind, v]]);
 
         for (let n = 0; n < sc.ticks; n++) {
           for (const [kind, v] of events.get(n) ?? []) {

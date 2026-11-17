@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { createGame, rules } from '../src/index';
 
 // two humans so bots do not take part in the diplomacy under test
-const start = (seed = 11) => createGame({ seed, headless: true, humans: { 0: 'a', 1: 'b' } });
+const start = (seed = 11) =>
+  createGame({ seed, headless: true, humans: { 0: 'a', 1: 'b' } });
 type G = ReturnType<typeof start>;
 const ally = (game: G) => {
   expect(game.apply(0, { t: 'ally', to: 1 })).toBeNull();
@@ -24,13 +25,15 @@ describe('alliances', () => {
   it('allies never pick each other as targets', () => {
     const game = start();
     ally(game);
-    const mine = game.world.units.find((u) => u.owner === 0)!;
-    const theirs = game.world.units.find((u) => u.owner === 1)!;
+    const mine = game.world.units.find(u => u.owner === 0)!;
+    const theirs = game.world.units.find(u => u.owner === 1)!;
     theirs.x = mine.x + 0.8;
     theirs.y = mine.y;
     for (let i = 0; i < 20; i++) game.step();
     expect(mine.tgt === theirs.id || theirs.tgt === mine.id).toBe(false);
-    expect(game.apply(0, { t: 'attack', ids: [mine.id], target: theirs.id })).toBe('Це союзник');
+    expect(
+      game.apply(0, { t: 'attack', ids: [mine.id], target: theirs.id }),
+    ).toEqual({ key: 'error.ally' });
   });
 
   it('the pact ends after 8 minutes unless both renew', () => {
@@ -58,7 +61,7 @@ describe('alliances', () => {
     expect(game.apply(0, { t: 'unally', to: 1 })).toBeNull();
     expect(game.allied(0, 1)).toBe(false);
     expect(G.players[0].traitorUntil).toBeCloseTo(G.t + rules.TRAITOR_TIME, 0);
-    expect(game.apply(0, { t: 'ally', to: 2 })).toMatch(/зради/);
+    expect(game.apply(0, { t: 'ally', to: 2 })?.key).toBe('error.traitor');
     expect(G.players[0].stats.betrayals).toBe(1);
   });
 
@@ -66,19 +69,21 @@ describe('alliances', () => {
     const game = start();
     const G = game.world;
     ally(game);
-    const p = G.players[0],
-      q = G.players[1];
+    const p = G.players[0];
+    const q = G.players[1];
     const w0 = p.res.wood;
     expect(game.apply(0, { t: 'gift', to: 1, res: 'wood' })).toBeNull();
     expect(p.res.wood).toBeCloseTo(w0 - rules.GIFT_AMOUNT.wood);
-    const c = G.convoys.find((c) => c.giftTo === 1)!;
+    const c = G.convoys.find(c => c.giftTo === 1)!;
     expect(c).toBeTruthy();
     const before = q.res.wood;
     for (let i = 0; i < 3000 && !c.dead; i++) game.step();
     expect(c.dead).toBe(true);
     expect(q.stats.giftsGot).toBe(rules.GIFT_AMOUNT.wood);
     expect(q.res.wood).toBeGreaterThan(before);
-    expect(game.apply(0, { t: 'gift', to: 2, res: 'wood' })).toMatch(/союзникам/);
+    expect(game.apply(0, { t: 'gift', to: 2, res: 'wood' })).toEqual({
+      key: 'error.giftsAlliesOnly',
+    });
   });
 
   it('pings are kept for a few seconds', () => {
@@ -94,7 +99,7 @@ describe('alliances', () => {
     const G = game.world;
     ally(game);
     const q = G.players[1];
-    const mine = G.units.find((u) => u.owner === 0)!;
+    const mine = G.units.find(u => u.owner === 0)!;
     mine.x = q.hq.x + 1.5;
     mine.y = q.hq.y + 1.5;
     mine.path = null;
@@ -109,15 +114,28 @@ describe('alliances', () => {
     game.drainNotices();
     expect(game.apply(0, { t: 'say', to: 3, k: 'hi' })).toBeNull();
     const notes = game.drainNotices();
-    expect(notes.some(([seat, m]) => seat === 3 && /Вітаю/.test(m))).toBe(true);
-    expect(notes.some(([seat, m]) => seat === 0 && /Взаємно/.test(m))).toBe(true);
-    expect(game.apply(0, { t: 'say', to: 3, k: 'hi' })).toMatch(/Гонець/);
+    expect(notes).toContainEqual([
+      3,
+      { key: 'notice.say', params: { player: 0, say: 'hi' } },
+    ]);
+    expect(notes).toContainEqual([
+      0,
+      { key: 'notice.replyLikewise', params: { player: 3 } },
+    ]);
+    expect(game.apply(0, { t: 'say', to: 3, k: 'hi' })).toEqual({
+      key: 'error.messengerBusy',
+    });
   });
 });
 
 describe('market', () => {
   it('trades 30 for 10 at the castle and refuses bad trades', () => {
-    const game = createGame({ seed: 7, diff: 1, humans: { 0: 'A' }, headless: true });
+    const game = createGame({
+      seed: 7,
+      diff: 1,
+      humans: { 0: 'A' },
+      headless: true,
+    });
     const p = game.world.players[0];
     p.res.wood = 100;
     p.res.steel = 5;
@@ -125,7 +143,12 @@ describe('market', () => {
     expect(p.res.wood).toBe(70);
     expect(p.res.steel).toBe(15);
     p.res.ore = 10;
-    expect(game.apply(0, { t: 'trade', from: 'ore', to: 'food' })).toBeTruthy();
-    expect(game.apply(0, { t: 'trade', from: 'wood', to: 'wood' })).toBeTruthy();
+    expect(game.apply(0, { t: 'trade', from: 'ore', to: 'food' })).toEqual({
+      key: 'error.tradeNeeds',
+      params: { amount: rules.MARKET_GIVE },
+    });
+    expect(game.apply(0, { t: 'trade', from: 'wood', to: 'wood' })).toEqual({
+      key: 'error.badTrade',
+    });
   });
 });

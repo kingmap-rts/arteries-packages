@@ -11,7 +11,11 @@ The contract between the game server and the browser. No simulation, no runtime 
   `cleanReplay()`, `REPLAY_MAX_BYTES`.
 
 ```ts
-import { cleanIntent, type ClientMsg, type ServerMsg } from '@caspen13/arteries-protocol';
+import {
+  cleanIntent,
+  type ClientMsg,
+  type ServerMsg,
+} from '@caspen13/arteries-protocol';
 
 const m: ClientMsg = JSON.parse(data);
 if (m.t === 'i') {

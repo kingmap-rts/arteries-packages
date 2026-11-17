@@ -13,6 +13,17 @@ Anything that changes what `step()` computes is a breaking change for online pla
   order of `rand()` calls: that changes every match from that point on.
 - Visual-only data (`world.fx`, `world.shots`, `terrV`, `ang`) must never be read by the sim.
 
+## No text
+
+The core holds no human-language text (no Cyrillic in `src`, no English UI strings either).
+Refusals and notices are `GameMessage`s built with `msg(key, params)` (`sim/world/events.ts`):
+`error.<camelCase>` for refused commands, `notice.<camelCase>` for notices, the same key for the
+same text everywhere. Params: seats as `player` / `ally` / `by` / `owner` / `target`; rule ids as
+`building` (`b.spec ?? b.type`), `site`, `path`, `perk`, `unit`, `res` / `give` / `get`, `signal`,
+`say`; everything else plain numbers (`seconds`, `amount`, `percent`, `max`, …). Rule tables carry
+numbers and icons only. `Player.name` is the nick of a human seat ('' for bots) and the simulation
+never reads it. A new message needs its uk and en text in the front end's locales.
+
 ## The golden test
 
 `test/golden.test.ts` replays 4 recorded matches (`test/fixtures/golden.json`) and compares the

@@ -4,7 +4,13 @@ import { campaign } from './campaign';
 import { botDiplomacy } from './diplomacy';
 import { botMarket } from './market';
 import { botPaths } from './paths';
-import { build, buildCheck, canAfford, specialize, train } from '../commands/build';
+import {
+  build,
+  buildCheck,
+  canAfford,
+  specialize,
+  train,
+} from '../commands/build';
 import { BUILDINGS } from '../config/buildings';
 import { Deposit, Terrain } from '../config/map';
 import { POST_RADIUS, ROAD_LEN } from '../config/network';
@@ -18,18 +24,23 @@ import { soldierCount } from '../systems/squads';
 import { dist, tileIndex, detCos, detSin, inBounds } from '../util/geometry';
 import { goodsTotal } from '../util/resources';
 import { randomInt, rand } from '../util/rng';
-import { lootCarried, wagonLoad, isDepot, nearestLinkedDepot } from '../world/entities';
+import {
+  lootCarried,
+  wagonLoad,
+  isDepot,
+  nearestLinkedDepot,
+} from '../world/entities';
 
 export function botTick(p: Player) {
-  const my = G.buildings.filter((b) => !b.dead && b.owner === p.id);
-  const deps = my.filter((b) => isDepot(b) && b.linked);
-  const army = G.units.filter((u) => !u.dead && u.owner === p.id);
+  const my = G.buildings.filter(b => !b.dead && b.owner === p.id);
+  const deps = my.filter(b => isDepot(b) && b.linked);
+  const army = G.units.filter(u => !u.dead && u.owner === p.id);
   botDiplomacy(p);
   botMarket(p);
-  const enemies = G.players.filter((q) => q.alive && hostile(p.id, q.id));
+  const enemies = G.players.filter(q => q.alive && hostile(p.id, q.id));
   if (!enemies.length) return;
-  let foe = null,
-    fd = 1e9;
+  let foe = null;
+  let fd = 1e9;
   for (const q of enemies) {
     if (!q.hq || q.hq.dead) continue;
     const d = dist(q.hq.x, q.hq.y, p.hq.x, p.hq.y) * (0.95 + rand() * 0.1);
@@ -42,8 +53,8 @@ export function botTick(p: Player) {
   const P = p.ai.P;
   let acted = false;
   // 1. specialize
-  const plain = deps.filter((b) => b.type === 'depot' && !b.spec);
-  const nSpec = (s: SpecType) => my.filter((b) => b.spec === s).length;
+  const plain = deps.filter(b => b.type === 'depot' && !b.spec);
+  const nSpec = (s: SpecType) => my.filter(b => b.spec === s).length;
   if (plain.length) {
     if (nSpec('forge') < 1 + Math.floor(deps.length / P.forgeDiv)) {
       const b = plain.reduce((a, c) => (c.yld.ore > a.yld.ore ? c : a));
@@ -52,7 +63,8 @@ export function botTick(p: Player) {
     if (
       !acted &&
       nSpec('barracks') <
-        (deps.length >= P.barracks ? 1 : 0) + (deps.length >= P.barracks * 3 ? 1 : 0) &&
+        (deps.length >= P.barracks ? 1 : 0) +
+          (deps.length >= P.barracks * 3 ? 1 : 0) &&
       foe
     ) {
       const b = plain.reduce((a, c) => (toFoe(c) < toFoe(a) ? c : a));
@@ -70,22 +82,23 @@ export function botTick(p: Player) {
   // 2. expand
   const allDeps = my.filter(isDepot).length;
   if (!acted && allDeps < 2 + G.t / P.expand && canAfford(p, BUILDINGS.depot)) {
-    let best = null,
-      bs = -1e9;
+    let best = null;
+    let bs = -1e9;
     for (let tries = 0; tries < 70; tries++) {
       const base = deps[randomInt(0, deps.length - 1)];
       if (!base) break;
-      const a = rand() * Math.PI * 2,
-        r = 5.5 + rand() * 3.4;
-      const x = Math.round(base.x + detCos(a) * r),
-        y = Math.round(base.y + detSin(a) * r);
+      const a = rand() * Math.PI * 2;
+      const r = 5.5 + rand() * 3.4;
+      const x = Math.round(base.x + detCos(a) * r);
+      const y = Math.round(base.y + detSin(a) * r);
       if (buildCheck(p, 'depot', x, y)) continue;
       let sc = 0;
       for (let dy = -POST_RADIUS; dy <= POST_RADIUS; dy++)
         for (let dx = -POST_RADIUS; dx <= POST_RADIUS; dx++) {
-          const X = x + dx,
-            Y = y + dy;
-          if (!inBounds(X, Y) || dx * dx + dy * dy > POST_RADIUS * POST_RADIUS) continue;
+          const X = x + dx;
+          const Y = y + dy;
+          if (!inBounds(X, Y) || dx * dx + dy * dy > POST_RADIUS * POST_RADIUS)
+            continue;
           const k = tileIndex(X, Y);
           if (G.own[k] === -1) {
             sc += 0.08;
@@ -114,13 +127,13 @@ export function botTick(p: Player) {
   }
   // 3. train
   const cap = Math.min(P.ai2 ? 75 : 45, (10 + G.t / 7) * p.ai.cap);
-  const hireAt = [p.hq, ...deps.filter((b) => b.spec === 'barracks')].reduce((a, c) =>
-    toFoe(c) < toFoe(a) ? c : a,
+  const hireAt = [p.hq, ...deps.filter(b => b.spec === 'barracks')].reduce(
+    (a, c) => (toFoe(c) < toFoe(a) ? c : a),
   );
   for (let n = 0; n < 2 && soldierCount(army) < cap; n++) {
-    const nW = soldierCount(army.filter((u) => u.type === 'wagon')),
-      nS = soldierCount(army.filter((u) => u.type === 'siege')),
-      nA = soldierCount(army);
+    const nW = soldierCount(army.filter(u => u.type === 'wagon'));
+    const nS = soldierCount(army.filter(u => u.type === 'siege'));
+    const nA = soldierCount(army);
     let type: UnitType = rand() < P.raid ? 'raid' : 'inf';
     if (
       P.wagonW > 0 &&
@@ -141,17 +154,17 @@ export function botTick(p: Player) {
     // a doctrine unit now and then, only when it is affordable (otherwise hire the usual soldier) and useful:
     // builders only while one of our roads burns, arsonists only once there is an enemy network to burn
     if (p.doc && type !== 'wagon' && rand() < 0.22) {
-      const uu = PATHS[p.doc].unit,
-        lim = uu === 'militia' ? 14 : uu === 'golem' ? 4 : 3;
+      const uu = PATHS[p.doc].unit;
+      const lim = uu === 'militia' ? 14 : uu === 'golem' ? 4 : 3;
       const useful =
         uu === 'builder'
-          ? G.links.some((l) => l.owner === p.id && (G.sab.get(l.key) || 0) > G.t)
+          ? G.links.some(l => l.owner === p.id && (G.sab.get(l.key) || 0) > G.t)
           : uu === 'arsonist'
             ? G.t > 300
             : true;
       if (
         useful &&
-        soldierCount(army.filter((u) => u.type === uu)) < lim &&
+        soldierCount(army.filter(u => u.type === uu)) < lim &&
         canAfford(p, unitCost(p, uu)) &&
         p.res.steel >= UNITS[uu].steel + 6
       )
@@ -163,16 +176,17 @@ export function botTick(p: Player) {
       !canAfford(p, unitCost(p, type))
     )
       break;
-    if (p.pop < 1 || p.pop - 1 < p.labor * (p.ai.alert > G.t ? 0.3 : P.labor)) break;
+    if (p.pop < 1 || p.pop - 1 < p.labor * (p.ai.alert > G.t ? 0.3 : P.labor))
+      break;
     const u = train(p, type, hireAt);
-    if (typeof u === 'object') army.push(u);
+    if (!('key' in u)) army.push(u);
   }
   // 4. military
   const idle = army.filter(
-    (u) => !u.tgt && (!u.path || !u.path.length) && !(u.job && u.jobUntil > G.t),
+    u => !u.tgt && (!u.path || !u.path.length) && !(u.job && u.jobUntil > G.t),
   );
-  let threat = null,
-    td = 1e9;
+  let threat = null;
+  let td = 1e9;
   for (const e of G.units) {
     if (e.dead || !hostile(p.id, e.owner)) continue;
     const k = tileIndex(e.x | 0, e.y | 0);
@@ -187,8 +201,8 @@ export function botTick(p: Player) {
   if (!threat) {
     for (const l of G.links) {
       if (l.owner !== p.id || !l.blocked) continue;
-      const mx = (l.a.x + l.b.x) / 2 + 0.5,
-        my_ = (l.a.y + l.b.y) / 2 + 0.5;
+      const mx = (l.a.x + l.b.x) / 2 + 0.5;
+      const my_ = (l.a.y + l.b.y) / 2 + 0.5;
       const d = dist(mx, my_, p.hq.x, p.hq.y);
       if (d < td) {
         td = d;
@@ -198,7 +212,7 @@ export function botTick(p: Player) {
   }
   if (threat) p.ai.alert = G.t + 15;
   if (threat) {
-    const def = idle.filter((u) => dist(u.x, u.y, threat.x, threat.y) < 24);
+    const def = idle.filter(u => dist(u.x, u.y, threat.x, threat.y) < 24);
     if (def.length) {
       orderMove(def, threat.x | 0, threat.y | 0);
       for (const u of def) {
@@ -207,8 +221,10 @@ export function botTick(p: Player) {
       }
     }
   }
-  const idleInf = idle.filter((u) => (u.type === 'inf' || u.type === 'siege') && u.job !== 'def');
-  for (const w of idle.filter((u) => u.type === 'wagon')) {
+  const idleInf = idle.filter(
+    u => (u.type === 'inf' || u.type === 'siege') && u.job !== 'def',
+  );
+  for (const w of idle.filter(u => u.type === 'wagon')) {
     if (wagonLoad(w) < 15) {
       const h = nearestLinkedDepot(p.id, w.x, w.y);
       if (h) {
@@ -221,8 +237,8 @@ export function botTick(p: Player) {
   botPaths(p, army, threat, td);
   if (P.ai2) campaign(p, army, idle, idleInf, enemies, threat, td);
   else if (G.t > p.ai.waveAt && soldierCount(idleInf) >= p.ai.wave && foe) {
-    let tb = null,
-      bd = 1e9;
+    let tb = null;
+    let bd = 1e9;
     for (const b of G.buildings) {
       if (b.dead || !hostile(p.id, b.owner) || !isDepot(b)) continue;
       const d =
@@ -247,7 +263,9 @@ export function botTick(p: Player) {
       p.stats.waveUnits += soldierCount(idleInf);
       p.stats.waveDist += dist(tb.x, tb.y, p.hq.x, p.hq.y);
       if (tb.type === 'hq') p.stats.hqTargets++;
-      const wag = idle.filter((u) => u.type === 'wagon' && wagonLoad(u) >= 15).slice(0, 1);
+      const wag = idle
+        .filter(u => u.type === 'wagon' && wagonLoad(u) >= 15)
+        .slice(0, 1);
       if (wag.length) {
         orderMove(wag, tb.x, tb.y, 'move');
         for (const u of wag) {
@@ -259,7 +277,7 @@ export function botTick(p: Player) {
       p.ai.wave = Math.min(24, p.ai.wave + P.waveInc);
     }
   }
-  const idleR = idle.filter((u) => u.type === 'raid' && u.job !== 'def');
+  const idleR = idle.filter(u => u.type === 'raid' && u.job !== 'def');
   if (G.t > 40)
     for (const u of idleR) {
       if (lootCarried(u) > 0) {
@@ -274,12 +292,13 @@ export function botTick(p: Player) {
       const roll = rand();
       if (P.smartCut) {
         // focused sabotage of trunk lines next to enemy HQs
-        let bl = null,
-          bd = 1e9;
+        let bl = null;
+        let bd = 1e9;
         for (const l of G.links) {
-          if (!hostile(p.id, l.owner) || l.blocked || !G.players[l.owner].alive) continue;
-          const mx = (l.a.x + l.b.x) / 2 + 0.5,
-            my_ = (l.a.y + l.b.y) / 2 + 0.5;
+          if (!hostile(p.id, l.owner) || l.blocked || !G.players[l.owner].alive)
+            continue;
+          const mx = (l.a.x + l.b.x) / 2 + 0.5;
+          const my_ = (l.a.y + l.b.y) / 2 + 0.5;
           const d =
             dist(mx, my_, u.x, u.y) *
             (Math.min(l.a.hop, l.b.hop) === 0 ? 0.35 : 1) *
@@ -298,8 +317,8 @@ export function botTick(p: Player) {
       }
       if (roll < 0.45) {
         // plunder a stocked enemy depot
-        let bt = null,
-          bd = 34;
+        let bt = null;
+        let bd = 34;
         for (const b of G.buildings) {
           if (
             b.dead ||
@@ -324,13 +343,14 @@ export function botTick(p: Player) {
       }
       if (roll < 0.85 && P.cutMin < 99) {
         // sabotage a line
-        let bl = null,
-          bd = 34;
+        let bl = null;
+        let bd = 34;
         for (const l of G.links) {
-          if (!hostile(p.id, l.owner) || l.blocked || !G.players[l.owner].alive) continue;
+          if (!hostile(p.id, l.owner) || l.blocked || !G.players[l.owner].alive)
+            continue;
           if (l.a.spec === 'fort' || l.b.spec === 'fort') continue;
-          const mx = (l.a.x + l.b.x) / 2 + 0.5,
-            my_ = (l.a.y + l.b.y) / 2 + 0.5;
+          const mx = (l.a.x + l.b.x) / 2 + 0.5;
+          const my_ = (l.a.y + l.b.y) / 2 + 0.5;
           const d = dist(mx, my_, u.x, u.y);
           if (d < bd) {
             bd = d;
@@ -344,8 +364,8 @@ export function botTick(p: Player) {
           continue;
         }
       }
-      let bc = null,
-        bd = 24;
+      let bc = null;
+      let bd = 24;
       for (const c of G.convoys) {
         if (c.dead || !hostile(p.id, c.owner)) continue;
         const d = dist(c.x, c.y, u.x, u.y);

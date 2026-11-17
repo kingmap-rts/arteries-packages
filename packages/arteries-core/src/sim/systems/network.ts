@@ -13,7 +13,6 @@ import {
 import { Deposit, MAP_H, MAP_W, SEATS, TILES, Terrain } from '../config/map';
 import { HQ_RADIUS } from '../config/network';
 import { WAGON_R } from '../config/units';
-import { loc } from '../i18n';
 import { claimRadius, hasPerk, roadLength, siteWorkers } from '../modifiers';
 import { G, matchState, depositMap, sites, terrainMap } from '../state';
 import { captureTick } from './capture';
@@ -21,7 +20,7 @@ import { hostile, supplyDeps } from './diplomacy';
 import { builderTick, sabotageTick } from './sabotage';
 import { dist, tileIndex, segmentDist } from '../util/geometry';
 import { isDepot, linkKey } from '../world/entities';
-import { logEvent, notify } from '../world/events';
+import { logEvent, msg, notify } from '../world/events';
 
 /** Is the road a–b cut for its owner? `by` is the seat with the most soldiers on it (-1 when it burns). */
 export function linkBlocked(
@@ -30,12 +29,12 @@ export function linkBlocked(
   owner: number,
 ): { blocked: boolean; by: number } {
   if ((G.sab.get(linkKey(a, b)) || 0) > G.t) return { blocked: true, by: -1 };
-  const ax = a.x + 0.5,
-    ay = a.y + 0.5,
-    bx = b.x + 0.5,
-    by = b.y + 0.5;
-  let foe = 0,
-    fr = 0;
+  const ax = a.x + 0.5;
+  const ay = a.y + 0.5;
+  const bx = b.x + 0.5;
+  const by = b.y + 0.5;
+  let foe = 0;
+  let fr = 0;
   const fo = new Array(SEATS).fill(0);
   for (const u of G.units) {
     if (u.dead) continue;
@@ -69,12 +68,16 @@ export function computeTerritory() {
   own.fill(-1);
   const best = new Float32Array(TILES).fill(1e9);
   const claim = G.buildings
-    .filter((b) => !b.dead && isDepot(b) && b.linked)
+    .filter(b => !b.dead && isDepot(b) && b.linked)
     .sort((a, b) => a.id - b.id);
   for (const b of claim) {
     const R = b.type === 'hq' ? HQ_RADIUS : claimRadius(b);
     for (let y = Math.max(0, b.y - R); y <= Math.min(MAP_H - 1, b.y + R); y++)
-      for (let x = Math.max(0, b.x - R); x <= Math.min(MAP_W - 1, b.x + R); x++) {
+      for (
+        let x = Math.max(0, b.x - R);
+        x <= Math.min(MAP_W - 1, b.x + R);
+        x++
+      ) {
         const r2 = (x - b.x) ** 2 + (y - b.y) ** 2;
         if (r2 > R * R + 0.5) continue;
         const k = tileIndex(x, y);
@@ -101,7 +104,8 @@ export function computeTerritory() {
     const b = G.byId.get(G.tdep[k]) as Building | undefined;
     if (!b || b.dead) continue;
     if (depositMap[k] === Deposit.Ore) b.yld.ore += YIELD_ORE;
-    else if (depositMap[k] === Deposit.Crystal) b.yld.crystal += YIELD_CRYSTAL * TUNE.crystal;
+    else if (depositMap[k] === Deposit.Crystal)
+      b.yld.crystal += YIELD_CRYSTAL * TUNE.crystal;
     else if (depositMap[k] === Deposit.Grain) b.yld.food += YIELD_GRAIN;
     else if (terrainMap[k] === Terrain.Forest) b.yld.wood += YIELD_FOREST;
     else if (terrainMap[k] === Terrain.Plain) {
@@ -111,9 +115,9 @@ export function computeTerritory() {
   }
   // production sites: whoever's linked territory covers them
   for (const st of sites) {
-    const k = tileIndex(st.x, st.y),
-      o = own[k],
-      prev = st.owner;
+    const k = tileIndex(st.x, st.y);
+    const o = own[k];
+    const prev = st.owner;
     let b: Building | null | undefined = null;
     if (o >= 0) {
       b = G.byId.get(G.tdep[k]) as Building | undefined;
@@ -126,25 +130,21 @@ export function computeTerritory() {
         SITE_TYPES[st.type].y * (st.type === 'vein' ? TUNE.crystal : 1);
     if (prev !== st.owner && G.t > 1) {
       const S = SITE_TYPES[st.type];
-      if (st.owner >= 0 && G.players[st.owner].stats) G.players[st.owner].stats.sitesGained++;
+      if (st.owner >= 0 && G.players[st.owner].stats)
+        G.players[st.owner].stats.sitesGained++;
       if (st.owner >= 0)
         notify(
           st.owner,
-          loc(
-            `${S.name} у твоїй мережі: +${Math.round(S.y * 60)}${S.em} за хв`,
-            `${S.name} joins your network: +${Math.round(S.y * 60)}${S.em} per min`,
-          ),
+          msg('notice.siteGained', {
+            site: st.type,
+            amount: Math.round(S.y * 60),
+            res: S.res,
+          }),
         );
-      if (prev >= 0)
-        notify(
-          prev,
-          loc(
-            `${S.name} втрачено: вона більше не на твоїй території`,
-            `${S.name} lost: it is no longer on your land`,
-          ),
-        );
+      if (prev >= 0) notify(prev, msg('notice.siteLost', { site: st.type }));
     }
-    if (prev !== st.owner && st.owner >= 0) logEvent('site', st.owner, { s: st.type, v: prev });
+    if (prev !== st.owner && st.owner >= 0)
+      logEvent('site', st.owner, { s: st.type, v: prev });
   }
   G.terrV = (G.terrV || 0) + 1; // render hint, not part of the simulated state
   return own;
@@ -170,13 +170,15 @@ export function recomputeNetwork() {
     const ds = deps[p.id];
     for (let i = 0; i < ds.length; i++)
       for (let j = i + 1; j < ds.length; j++) {
-        const a = ds[i],
-          b = ds[j];
+        const a = ds[i];
+        const b = ds[j];
         if (dist(a.x, a.y, b.x, b.y) <= roadLength(p)) {
           const key = linkKey(a, b);
           // a road ward or a king's highway cannot be cut
           const cut =
-            p.wardUntil > G.t || (G.royal.get(key) || 0) > G.t ? null : linkBlocked(a, b, p.id);
+            p.wardUntil > G.t || (G.royal.get(key) || 0) > G.t
+              ? null
+              : linkBlocked(a, b, p.id);
           const bl = cut ? cut.blocked : false;
           if (cut && cut.blocked) {
             p.stats.cutSuffer += 0.4;
@@ -189,7 +191,7 @@ export function recomputeNetwork() {
           }
         }
       }
-    const h = ds.find((b) => b.type === 'hq');
+    const h = ds.find(b => b.type === 'hq');
     if (!h) continue;
     h.linked = true;
     h.hop = 0;
@@ -213,8 +215,8 @@ export function recomputeNetwork() {
   }
   const own = computeTerritory();
   // population stats
-  const tl = new Array(SEATS).fill(0),
-    lb = new Array(SEATS).fill(0);
+  const tl = new Array(SEATS).fill(0);
+  const lb = new Array(SEATS).fill(0);
   for (let k = 0; k < TILES; k++) {
     const o = own[k];
     if (o < 0) continue;
@@ -222,11 +224,16 @@ export function recomputeNetwork() {
     if (depositMap[k]) lb[o] += 0.6;
     else if (terrainMap[k] === Terrain.Forest) lb[o] += 0.15;
   }
-  for (const st of sites) if (st.owner >= 0) lb[st.owner] += siteWorkers(G.players[st.owner]);
+  for (const st of sites)
+    if (st.owner >= 0) lb[st.owner] += siteWorkers(G.players[st.owner]);
   const ld = new Array(SEATS).fill(0);
   for (let k = 0; k < TILES; k++) {
     const o = own[k];
-    if (o >= 0 && (terrainMap[k] === Terrain.Plain || terrainMap[k] === Terrain.Forest)) ld[o]++;
+    if (
+      o >= 0 &&
+      (terrainMap[k] === Terrain.Plain || terrainMap[k] === Terrain.Forest)
+    )
+      ld[o]++;
   }
   for (const p of G.players) {
     p.tiles = tl[p.id];
@@ -259,9 +266,16 @@ export function recomputeNetwork() {
     u.supBy = 0;
     if (!s) {
       for (const w of G.units) {
-        if (w.dead || w.type !== 'wagon' || w.owner !== u.owner || !w.cargo || w.cargo.food < 0.5)
+        if (
+          w.dead ||
+          w.type !== 'wagon' ||
+          w.owner !== u.owner ||
+          !w.cargo ||
+          w.cargo.food < 0.5
+        )
           continue;
-        if (Math.abs(w.x - u.x) > WAGON_R || Math.abs(w.y - u.y) > WAGON_R) continue;
+        if (Math.abs(w.x - u.x) > WAGON_R || Math.abs(w.y - u.y) > WAGON_R)
+          continue;
         if (dist(w.x, w.y, u.x, u.y) <= WAGON_R) {
           s = true;
           u.supBy = w.id;

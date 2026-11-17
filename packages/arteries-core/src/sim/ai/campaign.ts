@@ -10,8 +10,8 @@ import { rand } from '../util/rng';
 import { wagonLoad, isDepot, nearestLinkedDepot } from '../world/entities';
 
 export function groupCentre(g: Unit[]) {
-  let x = 0,
-    y = 0;
+  let x = 0;
+  let y = 0;
   for (const u of g) {
     x += u.x;
     y += u.y;
@@ -20,13 +20,14 @@ export function groupCentre(g: Unit[]) {
 }
 
 export function pickFoe(p: Player, army: Unit[], enemies: Player[]) {
-  const myStr = soldierCount(army.filter((u) => u.type !== 'wagon')) + 1;
-  let best = null,
-    bs = 1e9;
+  const myStr = soldierCount(army.filter(u => u.type !== 'wagon')) + 1;
+  let best = null;
+  let bs = 1e9;
   for (const q of enemies) {
     if (!q.hq || q.hq.dead) continue;
     let qs = 1;
-    for (const u of G.units) if (u.owner === q.id && !u.dead && u.type !== 'wagon') qs += u.n || 1;
+    for (const u of G.units)
+      if (u.owner === q.id && !u.dead && u.type !== 'wagon') qs += u.n || 1;
     const s =
       dist(q.hq.x, q.hq.y, p.hq.x, p.hq.y) *
       (0.55 + Math.min(2, qs / myStr)) *
@@ -40,12 +41,12 @@ export function pickFoe(p: Player, army: Unit[], enemies: Player[]) {
 }
 
 export function pickTarget(p: Player, foe: Player, cx: number, cy: number) {
-  let tb = null,
-    bd = 1e9;
+  let tb = null;
+  let bd = 1e9;
   for (const b of G.buildings) {
     if (b.dead || b.owner === p.id || !isDepot(b)) continue;
-    const own = b.owner === foe.id,
-      dc = dist(b.x, b.y, cx, cy);
+    const own = b.owner === foe.id;
+    const dc = dist(b.x, b.y, cx, cy);
     if (!own && dc > 5) continue; // other players: only what is right in our way
     let s = dc + (own ? 0.6 * dist(b.x, b.y, foe.hq.x, foe.hq.y) : 0);
     if (!b.linked) s *= 0.6;
@@ -68,9 +69,11 @@ export function campaign(
   threat: Point | null,
   td: number,
 ) {
-  const ai = p.ai,
-    P = ai.P;
-  const group = army.filter((u) => u.job === 'push' && (u.type === 'inf' || u.type === 'siege'));
+  const ai = p.ai;
+  const P = ai.P;
+  const group = army.filter(
+    u => u.job === 'push' && (u.type === 'inf' || u.type === 'siege'),
+  );
   // home defence: recall the group only when the defenders at home are outnumbered
   if (threat && td < 11 && group.length) {
     let foes = 0;
@@ -84,7 +87,10 @@ export function campaign(
         foes += e.n || 1;
     const home = soldierCount(
       army.filter(
-        (u) => u.job !== 'push' && u.type !== 'wagon' && dist(u.x, u.y, p.hq.x, p.hq.y) < 14,
+        u =>
+          u.job !== 'push' &&
+          u.type !== 'wagon' &&
+          dist(u.x, u.y, p.hq.x, p.hq.y) < 14,
       ),
     );
     if (foes > home + 2) {
@@ -134,7 +140,7 @@ export function campaign(
   const [cx, cy] = groupCentre(group);
   // reinforcements stream to the group instead of waiting for a whole new wave
   if (soldierCount(idleInf) >= 3 && group.length) {
-    const fresh = idleInf.filter((u) => u.job !== 'push');
+    const fresh = idleInf.filter(u => u.job !== 'push');
     if (soldierCount(fresh) >= 3) {
       orderMove(fresh, cx | 0, cy | 0);
       for (const u of fresh) {
@@ -171,7 +177,7 @@ export function campaign(
     }
     if (tb.type === 'hq') p.stats.hqTargets++;
     p.stats.waveDist += dist(tb.x, tb.y, p.hq.x, p.hq.y);
-    const free = group.filter((u) => !u.tgt);
+    const free = group.filter(u => !u.tgt);
     orderMove(free, tb.x, tb.y);
     for (const u of free) {
       u.job = 'push';
@@ -179,12 +185,18 @@ export function campaign(
     }
   } else {
     // progress check (group moved or is fighting)
-    if (ai.gLast && (dist(cx, cy, ai.gLast[0], ai.gLast[1]) > 2 || group.some((u) => u.tgt))) {
+    if (
+      ai.gLast &&
+      (dist(cx, cy, ai.gLast[0], ai.gLast[1]) > 2 || group.some(u => u.tgt))
+    ) {
       ai.gProgT = G.t;
       ai.gLast = [cx, cy];
     }
     const lag = group.filter(
-      (u) => !u.tgt && (!u.path || !u.path.length) && dist(u.x, u.y, tb!.x, tb!.y) > 3,
+      u =>
+        !u.tgt &&
+        (!u.path || !u.path.length) &&
+        dist(u.x, u.y, tb!.x, tb!.y) > 3,
     );
     if (lag.length) {
       orderMove(lag, tb.x, tb.y);
@@ -195,10 +207,10 @@ export function campaign(
     }
   }
   // a loaded wagon follows the group so the push stays supplied
-  const esc = army.filter((u) => u.type === 'wagon' && u.job === 'escort');
+  const esc = army.filter(u => u.type === 'wagon' && u.job === 'escort');
   for (const w of esc) if (wagonLoad(w) < 5) w.job = null;
-  if (!esc.some((w) => wagonLoad(w) >= 5)) {
-    const w = idle.find((u) => u.type === 'wagon' && wagonLoad(u) >= 15);
+  if (!esc.some(w => wagonLoad(w) >= 5)) {
+    const w = idle.find(u => u.type === 'wagon' && wagonLoad(u) >= 15);
     if (w) {
       w.job = 'escort';
       w.jobUntil = FOREVER;
@@ -206,7 +218,11 @@ export function campaign(
     }
   }
   for (const w of esc)
-    if (w.job === 'escort' && (!w.path || !w.path.length) && dist(w.x, w.y, cx, cy) > 2.5) {
+    if (
+      w.job === 'escort' &&
+      (!w.path || !w.path.length) &&
+      dist(w.x, w.y, cx, cy) > 2.5
+    ) {
       orderMove([w], cx | 0, cy | 0, 'move');
       w.job = 'escort';
       w.jobUntil = FOREVER;

@@ -7,9 +7,10 @@ function play(seed: number, ticks: number, checkpoints: number[]) {
   const G = game.world;
   const hashes: string[] = [];
   for (let i = 1; i <= ticks; i++) {
-    if (i % 50 === 0) game.apply(0, { t: 'train', type: i % 100 === 0 ? 'raid' : 'inf' });
+    if (i % 50 === 0)
+      game.apply(0, { t: 'train', type: i % 100 === 0 ? 'raid' : 'inf' });
     if (i % 120 === 0) {
-      const mine = G.units.filter((u) => u.owner === 0).map((u) => u.id);
+      const mine = G.units.filter(u => u.owner === 0).map(u => u.id);
       const hq = G.players[0].hq;
       game.apply(0, {
         t: 'move',
@@ -37,7 +38,10 @@ describe('determinism', () => {
 
   it('map generation depends only on the seed', () => {
     const castles = () =>
-      createGame({ seed: 777, headless: true }).world.players.map((p) => [p.hq.x, p.hq.y]);
+      createGame({ seed: 777, headless: true }).world.players.map(p => [
+        p.hq.x,
+        p.hq.y,
+      ]);
     expect(castles()).toEqual(castles());
   });
 

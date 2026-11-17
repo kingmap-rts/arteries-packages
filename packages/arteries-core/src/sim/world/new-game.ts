@@ -1,7 +1,7 @@
 /** Creating a match: map, players, castles and starting troops. */
 import type { Building, Difficulty, NewGameOptions, Player } from './types';
 import { DEFAULT_BOT_PARAMS } from '../config/ai';
-import { COLORS, NAMES, SEATS, TILES } from '../config/map';
+import { COLORS, SEATS, TILES } from '../config/map';
 import { DIFFICULTY } from '../config/match';
 import { G, matchState, activate, newMatch, setWorld } from '../state';
 import { recomputeNetwork } from '../systems/network';
@@ -59,7 +59,7 @@ export function newStats() {
 
 export function newGame(diff: Difficulty, opts: NewGameOptions) {
   opts = opts || {};
-  const humans = opts.humans || { 0: 'Ти' };
+  const humans = opts.humans || { 0: '' };
   activate(newMatch(opts.seed != null ? opts.seed | 0 : 1));
   const starts = genMap();
   const Dd = DIFFICULTY[diff];
@@ -105,7 +105,7 @@ export function newGame(diff: Difficulty, opts: NewGameOptions) {
     const p: Player = {
       id: i,
       color: COLORS[i],
-      name: humans[i] != null ? String(humans[i]).slice(0, 16) : NAMES[i],
+      name: humans[i] != null ? String(humans[i]).slice(0, 16) : '',
       bot: humans[i] == null,
       auto: false,
       spawn: null,
@@ -140,7 +140,8 @@ export function newGame(diff: Difficulty, opts: NewGameOptions) {
     G.players.push(p);
     const [sx, sy] = starts[i];
     p.hq = addBuilding('hq', i, sx, sy);
-    for (let k = 0; k < 3; k++) addUnit('inf', i, sx + 0.5 + (k - 1) * 0.8, sy + 1.6);
+    for (let k = 0; k < 3; k++)
+      addUnit('inf', i, sx + 0.5 + (k - 1) * 0.8, sy + 1.6);
   }
   recomputeNetwork();
 }

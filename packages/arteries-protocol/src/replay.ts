@@ -30,7 +30,8 @@ export const REPLAY_MAX_BYTES = 4 * 1024 * 1024;
 
 /** Shape check for replays uploaded by clients (local games). */
 export function cleanReplay(x: any): Replay | null {
-  if (!x || typeof x !== 'object' || x.v !== 1 || x.mode !== 'local') return null;
+  if (!x || typeof x !== 'object' || x.v !== 1 || x.mode !== 'local')
+    return null;
   if (
     !Number.isInteger(x.seed) ||
     ![0, 1, 2].includes(x.diff) ||
@@ -42,25 +43,31 @@ export function cleanReplay(x: any): Replay | null {
   if (!Array.isArray(x.turns) || x.turns.length > x.ticks + 1) return null;
   const turns: Replay['turns'] = [];
   for (const t of x.turns) {
-    if (!Array.isArray(t) || !Number.isInteger(t[0]) || !Array.isArray(t[1])) return null;
+    if (!Array.isArray(t) || !Number.isInteger(t[0]) || !Array.isArray(t[1]))
+      return null;
     const list: [number, Intent][] = [];
     for (const [seat, it] of t[1]) {
       const c = cleanIntent(it);
-      if (c && Number.isInteger(seat) && seat >= 0 && seat < MAX_PLAYERS) list.push([seat, c]);
+      if (c && Number.isInteger(seat) && seat >= 0 && seat < MAX_PLAYERS)
+        list.push([seat, c]);
     }
     if (list.length) turns.push([t[0], list]);
   }
   const humans: Record<number, string> = {};
   const checks: Record<number, string> = {};
   for (const [k, v] of Object.entries(x.checks ?? {}).slice(0, 2000))
-    if (Number.isInteger(+k) && typeof v === 'string') checks[+k] = v.slice(0, 16);
+    if (Number.isInteger(+k) && typeof v === 'string')
+      checks[+k] = v.slice(0, 16);
   for (const [k, v] of Object.entries(x.humans ?? {}))
     if (+k >= 0 && +k < MAX_PLAYERS) humans[+k] = String(v).slice(0, 16);
   const r =
     x.result && typeof x.result === 'object'
       ? {
           winner: Number.isInteger(x.result.winner) ? x.result.winner : null,
-          reason: typeof x.result.reason === 'string' ? x.result.reason.slice(0, 32) : null,
+          reason:
+            typeof x.result.reason === 'string'
+              ? x.result.reason.slice(0, 32)
+              : null,
           tick: x.result.tick | 0,
         }
       : null;

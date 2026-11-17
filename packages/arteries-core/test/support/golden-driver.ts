@@ -1,6 +1,6 @@
 // The only place the golden test touches the core API: adapt it here when the API changes,
 // the recorded fixtures stay as they are.
-import { createGame, rules, type Intent } from '../../src/index';
+import { createGame, type Intent } from '../../src/index';
 
 export interface Driver {
   apply(seat: number, intent: Intent): void;
@@ -8,6 +8,7 @@ export interface Driver {
   hash(): string;
   /** test-only poke into the state (gives mana to human seats) */
   addCrystal(seat: number, n: number): void;
+  /** the fixture still records language switches; the core has no text, so they do nothing */
   setLang(l: 'uk' | 'en'): void;
 }
 
@@ -18,7 +19,6 @@ export function startGolden(o: {
   headless?: boolean;
   botParams?: Record<number, any>;
 }): Driver {
-  rules.setLang('uk');
   const game = createGame({
     seed: o.seed,
     diff: o.diff,
@@ -31,6 +31,6 @@ export function startGolden(o: {
     step: () => game.step(),
     hash: () => game.hash(),
     addCrystal: (seat, n) => void (game.world.players[seat].res.crystal += n),
-    setLang: (l) => rules.setLang(l),
+    setLang: () => {},
   };
 }

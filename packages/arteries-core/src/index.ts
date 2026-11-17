@@ -1,12 +1,12 @@
 /**
- * @caspen13/arteries-core — the deterministic simulation of «Артерії».
+ * @caspen13/arteries-core — the deterministic simulation of «Arteries».
  *
  * Lockstep: every client runs this core with the same seed, the server only relays player
  * intents per turn. Same seed + same intents in the same order = the same world everywhere
  * (compare Game.hash()).
  *
- *   const game = createGame({ seed: 42, humans: { 0: 'Аня' } });
- *   game.apply(0, { t: 'train', type: 'inf' });
+ *   const game = createGame({ seed: 42, humans: { 0: 'Anna' } });
+ *   game.apply(0, { t: 'train', type: 'inf' }); // null, or a GameMessage such as { key: 'error.noResources' }
  *   game.step();
  *   game.hash();
  */
@@ -14,6 +14,7 @@ export { createGame, Game, TICK } from './game';
 export type { GameOptions, GameResult, GameMap } from './game';
 export * as rules from './rules';
 export type {
+  GameMessage,
   World,
   Player,
   PlayerStats,

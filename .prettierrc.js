@@ -1,7 +1,6 @@
+// Same style as the other projects (land mobile): 80 columns, single quotes.
 module.exports = {
-  printWidth: 100,
+  arrowParens: 'avoid',
   singleQuote: true,
   trailingComma: 'all',
-  semi: true,
-  tabWidth: 2,
 };

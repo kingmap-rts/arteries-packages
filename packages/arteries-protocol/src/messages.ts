@@ -19,6 +19,10 @@ export interface LobbyPlayer {
   online: boolean;
 }
 
+/** Why the server refused a lobby action; the client shows the text in the player's language. */
+export type ServerError =
+  'hello_first' | 'room_not_found' | 'room_started' | 'room_full';
+
 /** client → server */
 export type ClientMsg =
   | { t: 'hello'; nick: string; token?: string }
@@ -66,7 +70,7 @@ export type ServerMsg =
       online?: number;
     }
   | { t: 'desync'; n: number }
-  | { t: 'err'; msg: string };
+  | { t: 'err'; code: ServerError };
 
 /** Spread human seats around the ring of start positions. */
 export function spreadSeats(k: number, np = MAX_PLAYERS): number[] {

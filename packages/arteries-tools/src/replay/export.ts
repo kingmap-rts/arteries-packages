@@ -25,13 +25,17 @@ const csv = (rows: Record<string, unknown>[]) => {
     const s = v == null ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  return [cols.join(','), ...rows.map((r) => cols.map((c) => q(r[c])).join(','))].join('\n') + '\n';
+  return (
+    [cols.join(','), ...rows.map(r => cols.map(c => q(r[c])).join(','))].join(
+      '\n',
+    ) + '\n'
+  );
 };
 
-const matches: Record<string, unknown>[] = [],
-  players: Record<string, unknown>[] = [],
-  minutes: Record<string, unknown>[] = [],
-  intents: Record<string, unknown>[] = [];
+const matches: Record<string, unknown>[] = [];
+const players: Record<string, unknown>[] = [];
+const minutes: Record<string, unknown>[] = [];
+const intents: Record<string, unknown>[] = [];
 for (const f of files) {
   const rep = loadReplay(f);
   const t0 = Date.now();
@@ -46,7 +50,8 @@ for (const f of files) {
     humans: nh,
     minutes: +(rep.ticks / 600).toFixed(1),
     winner: run.result.winner,
-    winnerHuman: run.result.winner != null && rep.humans[run.result.winner] != null,
+    winnerHuman:
+      run.result.winner != null && rep.humans[run.result.winner] != null,
     reason: run.result.reason ?? rep.result?.reason ?? '',
     verified: run.ok,
     checks: run.checked,
@@ -65,7 +70,12 @@ for (const f of files) {
   for (const m of run.minutes) minutes.push({ id: rep.id, ...m });
   for (const i of run.intents)
     if (rep.humans[i.seat] != null)
-      intents.push({ id: rep.id, seat: i.seat, minute: +(i.tick / 600).toFixed(2), intent: i.t });
+      intents.push({
+        id: rep.id,
+        seat: i.seat,
+        minute: +(i.tick / 600).toFixed(2),
+        intent: i.t,
+      });
   console.log(
     `${f}: ${(rep.ticks / 600).toFixed(1)} min, ${nh} humans, ${run.ok ? 'verified' : 'MISMATCH at ' + run.mismatchAt} (${run.checked} checks) in ${Date.now() - t0} ms`,
   );
@@ -75,4 +85,6 @@ writeFileSync(join(outDir, 'matches.csv'), csv(matches));
 writeFileSync(join(outDir, 'players.csv'), csv(players));
 writeFileSync(join(outDir, 'minutes.csv'), csv(minutes));
 writeFileSync(join(outDir, 'intents.csv'), csv(intents));
-console.log(`${files.length} replays → ${outDir}/{matches,players,minutes,intents}.csv`);
+console.log(
+  `${files.length} replays → ${outDir}/{matches,players,minutes,intents}.csv`,
+);

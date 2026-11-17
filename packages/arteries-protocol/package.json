@@ -1,6 +1,6 @@
 {
   "name": "@caspen13/arteries-protocol",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Contract between the «Артерії» game server and the browser: game vocabulary, player intents, WebSocket messages, replays and their validators",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

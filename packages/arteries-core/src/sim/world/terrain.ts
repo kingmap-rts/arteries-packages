@@ -5,4 +5,5 @@ import { tileIndex, inBounds } from '../util/geometry';
 
 export const walkable = (x: number, y: number) =>
   inBounds(x, y) &&
-  (terrainMap[tileIndex(x, y)] === Terrain.Plain || terrainMap[tileIndex(x, y)] === Terrain.Forest);
+  (terrainMap[tileIndex(x, y)] === Terrain.Plain ||
+    terrainMap[tileIndex(x, y)] === Terrain.Forest);

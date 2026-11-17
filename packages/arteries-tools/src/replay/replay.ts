@@ -5,7 +5,9 @@ import { createGame, type Replay } from '@caspen13/arteries-core';
 
 export function loadReplay(file: string): Replay {
   const buf = readFileSync(file);
-  return JSON.parse((file.endsWith('.gz') ? gunzipSync(buf) : buf).toString('utf8'));
+  return JSON.parse(
+    (file.endsWith('.gz') ? gunzipSync(buf) : buf).toString('utf8'),
+  );
 }
 
 export interface MinuteRow {
@@ -47,14 +49,18 @@ export interface ReplayRun {
 
 /** Same loop as the client: apply turn n's intents, then simulate tick n. */
 export function runReplay(rep: Replay): ReplayRun {
-  const game = createGame({ seed: rep.seed, diff: rep.diff, humans: rep.humans });
+  const game = createGame({
+    seed: rep.seed,
+    diff: rep.diff,
+    humans: rep.humans,
+  });
   const G = game.world;
   const turns = new Map(rep.turns.map(([n, list]) => [n, list]));
   const human = (s: number) => rep.humans[s] != null;
-  const minutes: MinuteRow[] = [],
-    intents: ReplayRun['intents'] = [];
-  let checked = 0,
-    mismatchAt: number | null = null;
+  const minutes: MinuteRow[] = [];
+  const intents: ReplayRun['intents'] = [];
+  let checked = 0;
+  let mismatchAt: number | null = null;
   for (let n = 0; n < rep.ticks; n++) {
     for (const [seat, it] of turns.get(n) ?? []) {
       game.apply(seat, it);
@@ -70,8 +76,8 @@ export function runReplay(rep: Replay): ReplayRun {
     }
     if (done % 600 === 0) {
       for (const p of G.players) {
-        const u = G.units.filter((x) => x.owner === p.id && !x.dead);
-        const c = (t: string) => u.filter((x) => x.type === t).length;
+        const u = G.units.filter(x => x.owner === p.id && !x.dead);
+        const c = (t: string) => u.filter(x => x.type === t).length;
         minutes.push({
           minute: done / 600,
           seat: p.id,
@@ -83,8 +89,9 @@ export function runReplay(rep: Replay): ReplayRun {
           raid: c('raid'),
           siege: c('siege'),
           wagon: c('wagon'),
-          depots: G.buildings.filter((b) => !b.dead && b.owner === p.id && b.type === 'depot')
-            .length,
+          depots: G.buildings.filter(
+            b => !b.dead && b.owner === p.id && b.type === 'depot',
+          ).length,
           pop: Math.round(p.pop),
           eff: +p.eff.toFixed(2),
           wood: Math.round(p.res.wood),
@@ -102,7 +109,7 @@ export function runReplay(rep: Replay): ReplayRun {
     mismatchAt,
     minutes,
     intents,
-    players: G.players.map((p) => ({
+    players: G.players.map(p => ({
       seat: p.id,
       name: p.name,
       human: human(p.id),

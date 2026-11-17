@@ -2,12 +2,11 @@
 import type { Convoy, Link, Unit } from '../world/types';
 import { RESOURCES } from '../config/economy';
 import { BURN_IMMUNITY } from '../config/network';
-import { loc } from '../i18n';
 import { hasPerk, burnTime, arsonTime } from '../modifiers';
 import { G } from '../state';
 import { hostile } from './diplomacy';
 import { segmentDist } from '../util/geometry';
-import { logEvent, notify } from '../world/events';
+import { logEvent, msg, notify } from '../world/events';
 
 export function sabotageTick(dt: number) {
   const seen = new Set();
@@ -27,10 +26,10 @@ export function sabotageTick(dt: number) {
       G.sabProg.delete(l.key);
       continue;
     }
-    const ax = l.a.x + 0.5,
-      ay = l.a.y + 0.5,
-      bx = l.b.x + 0.5,
-      by = l.b.y + 0.5;
+    const ax = l.a.x + 0.5;
+    const ay = l.a.y + 0.5;
+    const bx = l.b.x + 0.5;
+    const by = l.b.y + 0.5;
     let raider = null;
     for (const u of G.units) {
       if (u.dead || u.type !== 'raid' || !hostile(l.owner, u.owner)) continue;
@@ -55,31 +54,30 @@ export function sabotageTick(dt: number) {
       if (!pr || pr.by !== raider.owner) pr = { p: 0, by: raider.owner };
       pr.p += dt;
       G.sabProg.set(l.key, pr);
-      const att = G.players[raider.owner],
-        dur = burnTime(att, G.players[l.owner]);
+      const att = G.players[raider.owner];
+      const dur = burnTime(att, G.players[l.owner]);
       if (pr.p >= arsonTime(att)) {
         G.sab.set(l.key, G.t + dur);
         if (hasPerk(att, 'scorch'))
           for (const e of [l.a, l.b])
-            if (e.type === 'depot') for (const k of RESOURCES) e.stock[k] *= 0.6;
+            if (e.type === 'depot')
+              for (const k of RESOURCES) e.stock[k] *= 0.6;
         G.sabProg.delete(l.key);
         G.players[raider.owner].stats.sabotage++;
         G.players[l.owner].stats.sabotaged++;
         logEvent('sabotage', raider.owner, { v: l.owner });
-        G.fx.push({ x: (ax + bx) / 2, y: (ay + by) / 2, t: 0, dur: 0.9, r: 1.4, color: '#ff7b3d' });
-        notify(
-          l.owner,
-          loc(
-            `Ворог підпалив твою дорогу! Ремонт займе ${Math.round(dur)} с`,
-            `The enemy set your road on fire! Repairs take ${Math.round(dur)} s`,
-          ),
-        );
+        G.fx.push({
+          x: (ax + bx) / 2,
+          y: (ay + by) / 2,
+          t: 0,
+          dur: 0.9,
+          r: 1.4,
+          color: '#ff7b3d',
+        });
+        notify(l.owner, msg('notice.roadBurned', { seconds: Math.round(dur) }));
         notify(
           raider.owner,
-          loc(
-            `Дорогу підпалено на ${Math.round(dur)} с!`,
-            `Road set on fire for ${Math.round(dur)} s!`,
-          ),
+          msg('notice.roadSetOnFire', { seconds: Math.round(dur) }),
         );
       }
     } else if (pr) {
@@ -93,7 +91,16 @@ export function sabotageTick(dt: number) {
 export function guarded(l: Link) {
   for (const u of G.units) {
     if (u.dead || u.type !== 'builder' || u.owner !== l.owner) continue;
-    if (segmentDist(u.x, u.y, l.a.x + 0.5, l.a.y + 0.5, l.b.x + 0.5, l.b.y + 0.5) <= 1.6)
+    if (
+      segmentDist(
+        u.x,
+        u.y,
+        l.a.x + 0.5,
+        l.a.y + 0.5,
+        l.b.x + 0.5,
+        l.b.y + 0.5,
+      ) <= 1.6
+    )
       return true;
   }
   return false;
@@ -105,10 +112,7 @@ export function builderTick() {
     if (until <= G.t) continue;
     if (guarded(l)) {
       G.sab.set(l.key, G.t);
-      notify(
-        l.owner,
-        loc('Будівничий загасив пожежу на дорозі', 'A builder put out a fire on your road'),
-      );
+      notify(l.owner, msg('notice.fireOut'));
     }
   }
 }
@@ -119,10 +123,10 @@ export function arsonTick(u: Unit, dt: number) {
   let best = null;
   for (const l of G.links) {
     if (!hostile(u.owner, l.owner) || l.blocked) continue;
-    const ax = l.a.x + 0.5,
-      ay = l.a.y + 0.5,
-      bx = l.b.x + 0.5,
-      by = l.b.y + 0.5;
+    const ax = l.a.x + 0.5;
+    const ay = l.a.y + 0.5;
+    const bx = l.b.x + 0.5;
+    const by = l.b.y + 0.5;
     if (
       u.x < Math.min(ax, bx) - 1 ||
       u.x > Math.max(ax, bx) + 1 ||
@@ -144,7 +148,7 @@ export function arsonTick(u: Unit, dt: number) {
     G.traps.set(best.key, { owner: u.owner, n: 3 });
     u.trapT = 0;
     u.trapCd = G.t + 20;
-    notify(u.owner, loc('Пастку на дорозі заховано', 'Trap hidden on the road'));
+    notify(u.owner, msg('notice.trapHidden'));
   }
 }
 
@@ -157,9 +161,6 @@ export function springTrap(c: Convoy) {
   if (tr.n <= 0) {
     G.traps.delete(c.key);
     G.sab.set(c.key, Math.max(G.sab.get(c.key) || 0, G.t + 20));
-    notify(
-      c.owner,
-      loc('Каравани згоріли в пастці на дорозі!', 'Caravans burned in a trap on the road!'),
-    );
+    notify(c.owner, msg('notice.trapSprung'));
   }
 }

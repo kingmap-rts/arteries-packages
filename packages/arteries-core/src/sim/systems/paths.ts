@@ -1,8 +1,7 @@
 /** Choosing a path, buying tiers and casting the ultimate. */
-import type { PathId, Player } from '../world/types';
+import type { GameMessage, PathId, Player } from '../world/types';
 import { COLORS, SEATS } from '../config/map';
 import { PATHS, PATH_COST, ULT_COOLDOWN } from '../config/paths';
-import { loc } from '../i18n';
 import { ultimateOf } from '../modifiers';
 import { G } from '../state';
 import { hit } from './combat';
@@ -10,14 +9,15 @@ import { hostile } from './diplomacy';
 import { dist, segmentDist } from '../util/geometry';
 import { rand } from '../util/rng';
 import { addUnit, canHire, isDepot, nearest } from '../world/entities';
-import { logEvent, notify } from '../world/events';
+import { logEvent, msg, notify } from '../world/events';
 
 export function fireRainTick(dt: number) {
   if (!G.zones.length) return;
   for (const z of G.zones) {
     for (const b of G.buildings) {
       if (b.dead || !hostile(z.owner, b.owner)) continue;
-      if (dist(b.x + 0.5, b.y + 0.5, z.x, z.y) <= z.r) hit(b, 20 * dt, z.owner, z.x, z.y - 3);
+      if (dist(b.x + 0.5, b.y + 0.5, z.x, z.y) <= z.r)
+        hit(b, 20 * dt, z.owner, z.x, z.y - 3);
     }
     for (const u of G.units) {
       if (u.dead || !hostile(z.owner, u.owner)) continue;
@@ -38,14 +38,14 @@ export function fireRainTick(dt: number) {
         color: '#ff7b3d',
       });
   }
-  G.zones = G.zones.filter((z) => z.until > G.t);
+  G.zones = G.zones.filter(z => z.until > G.t);
 }
 
-export function choosePath(p: Player, d: PathId) {
-  if (p.doc) return loc('Шлях уже обрано', 'Path already chosen');
-  if (!PATHS[d]) return loc('Немає такого шляху', 'No such path');
+export function choosePath(p: Player, d: PathId): GameMessage | null {
+  if (p.doc) return msg('error.pathChosen');
+  if (!PATHS[d]) return msg('error.noSuchPath');
   if (p.res.crystal < PATH_COST[0])
-    return loc(`Потрібно ${PATH_COST[0]}💎 мани`, `You need ${PATH_COST[0]}💎 mana`);
+    return msg('error.needMana', { amount: PATH_COST[0] });
   p.res.crystal -= PATH_COST[0];
   p.doc = d;
   p.perks = [];
@@ -56,28 +56,29 @@ export function choosePath(p: Player, d: PathId) {
     notify(
       i,
       i === p.id
-        ? loc(`Ти обираєш шлях: ${PATHS[d].name}`, `Path chosen: ${PATHS[d].name}`)
-        : loc(
-            `${p.name} обирає шлях: ${PATHS[d].name}`,
-            `${p.name} has chosen a path: ${PATHS[d].name}`,
-          ),
+        ? msg('notice.pathChosenYou', { path: d })
+        : msg('notice.pathChosen', { player: p.id, path: d }),
     );
   return null;
 }
 
-export function pickPerk(p: Player, i: number) {
-  if (!p.doc) return loc('Спершу обери шлях', 'Choose a path first');
+export function pickPerk(p: Player, i: number): GameMessage | null {
+  if (!p.doc) return msg('error.choosePathFirst');
   const tier = p.perks.length;
-  if (tier >= 3) return loc('Усі ступені вже відкрито', 'All tiers are already open');
+  if (tier >= 3) return msg('error.allTiersOpen');
   const cost = PATH_COST[tier + 1];
-  if (p.res.crystal < cost) return loc(`Потрібно ${cost}💎 мани`, `You need ${cost}💎 mana`);
+  if (p.res.crystal < cost) return msg('error.needMana', { amount: cost });
   const id = PATHS[p.doc].perks[tier][i ? 1 : 0];
   p.res.crystal -= cost;
   p.perks.push(id);
   logEvent('perk', p.id, { id });
   if (id === 'walls')
     for (const b of G.buildings)
-      if (!b.dead && b.owner === p.id && (b.type === 'hq' || b.spec === 'fort')) {
+      if (
+        !b.dead &&
+        b.owner === p.id &&
+        (b.type === 'hq' || b.spec === 'fort')
+      ) {
         b.maxhp *= 1.3;
         b.hp *= 1.3;
       }
@@ -85,32 +86,38 @@ export function pickPerk(p: Player, i: number) {
   return null;
 }
 
-export function cast(p: Player, x: number, y: number) {
+export function cast(p: Player, x: number, y: number): GameMessage | null {
   const id = ultimateOf(p);
-  if (!id) return loc('Ульту ще не відкрито', 'Your ultimate is not unlocked yet');
+  if (!id) return msg('error.noUltimate');
   if (p.ultCd > G.t)
-    return loc(
-      `Перезарядка ще ${Math.ceil(p.ultCd - G.t)} с`,
-      `Recharging: ${Math.ceil(p.ultCd - G.t)} s`,
-    );
-  const mine = G.buildings.filter((b) => !b.dead && b.owner === p.id && isDepot(b));
+    return msg('error.recharging', { seconds: Math.ceil(p.ultCd - G.t) });
+  const mine = G.buildings.filter(
+    b => !b.dead && b.owner === p.id && isDepot(b),
+  );
   switch (id) {
     case 'ward':
       p.wardUntil = G.t + 30;
       G.netT = 0;
       break;
     case 'road': {
-      let best = null,
-        bd = 3.5;
+      let best = null;
+      let bd = 3.5;
       for (const l of G.links) {
         if (l.owner !== p.id) continue;
-        const d = segmentDist(x, y, l.a.x + 0.5, l.a.y + 0.5, l.b.x + 0.5, l.b.y + 0.5);
+        const d = segmentDist(
+          x,
+          y,
+          l.a.x + 0.5,
+          l.a.y + 0.5,
+          l.b.x + 0.5,
+          l.b.y + 0.5,
+        );
         if (d < bd) {
           bd = d;
           best = l;
         }
       }
-      if (!best) return loc('Торкнись своєї дороги', 'Tap one of your roads');
+      if (!best) return msg('error.tapOwnRoad');
       G.royal.set(best.key, G.t + 120);
       G.sab.delete(best.key);
       G.netT = 0;
@@ -118,12 +125,14 @@ export function cast(p: Player, x: number, y: number) {
     }
     case 'panic': {
       const b = nearest(
-        G.buildings.filter((b) => !b.dead && hostile(p.id, b.owner) && b.type === 'depot'),
+        G.buildings.filter(
+          b => !b.dead && hostile(p.id, b.owner) && b.type === 'depot',
+        ),
         x,
         y,
         3.5,
       );
-      if (!b) return loc('Торкнись ворожого поста', 'Tap an enemy post');
+      if (!b) return msg('error.tapEnemyPost');
       b.panicUntil = G.t + 45;
       break;
     }
@@ -131,14 +140,14 @@ export function cast(p: Player, x: number, y: number) {
       let n = 0;
       for (const l of G.links) {
         if (!hostile(p.id, l.owner)) continue;
-        const mx = (l.a.x + l.b.x) / 2 + 0.5,
-          my = (l.a.y + l.b.y) / 2 + 0.5;
+        const mx = (l.a.x + l.b.x) / 2 + 0.5;
+        const my = (l.a.y + l.b.y) / 2 + 0.5;
         if (dist(mx, my, x, y) <= 8) {
           G.sab.set(l.key, Math.max(G.sab.get(l.key) || 0, G.t + 20));
           n++;
         }
       }
-      if (!n) return loc('Поруч немає ворожих доріг', 'No enemy roads nearby');
+      if (!n) return msg('error.noEnemyRoads');
       G.netT = 0;
       break;
     }
@@ -147,24 +156,29 @@ export function cast(p: Player, x: number, y: number) {
       break;
     case 'rally': {
       const at = nearest(
-        mine.filter((b) => canHire(b) && b.linked),
+        mine.filter(b => canHire(b) && b.linked),
         x,
         y,
         1e9,
       );
-      if (!at) return loc('Немає замку чи вежі', 'No castle or watchtower');
+      if (!at) return msg('error.noCastleOrTower');
       for (let i = 0; i < 8; i++)
-        addUnit('inf', p.id, at.x + 0.5 + (rand() - 0.5) * 2, at.y + 1.4 + (rand() - 0.5) * 1.2);
+        addUnit(
+          'inf',
+          p.id,
+          at.x + 0.5 + (rand() - 0.5) * 2,
+          at.y + 1.4 + (rand() - 0.5) * 1.2,
+        );
       break;
     }
     case 'pitch': {
       const at = nearest(
-        mine.filter((b) => b.linked),
+        mine.filter(b => b.linked),
         x,
         y,
         1e9,
       );
-      if (!at) return loc('Немає постів', 'No posts');
+      if (!at) return msg('error.noPosts');
       for (let i = 0; i < 6; i++) {
         const u = addUnit(
           'militia',
@@ -178,13 +192,12 @@ export function cast(p: Player, x: number, y: number) {
     }
     case 'charter': {
       const b = nearest(
-        mine.filter((b) => b.type === 'depot' && !b.rBonus),
+        mine.filter(b => b.type === 'depot' && !b.rBonus),
         x,
         y,
         3.5,
       );
-      if (!b)
-        return loc('Торкнись свого поста без грамоти', 'Tap one of your posts without a charter');
+      if (!b) return msg('error.tapPostWithoutCharter');
       b.rBonus = 3;
       G.netT = 0;
       break;

@@ -4,42 +4,44 @@
 import {
   createGame,
   HASH_EVERY,
-  rules,
   type Game,
   type Intent,
   type SeatIntent,
   type ServerMsg,
 } from '@caspen13/arteries-core';
 
-const [url, nick, lang, turnsS, seedS] = process.argv.slice(2);
-const TURNS = +turnsS,
-  seed = +seedS;
-rules.setLang(lang === 'en' ? 'en' : 'uk');
+// the language argument is kept for old scripts; the core has no text, so it changes nothing
+const [url, nick, , turnsS, seedS] = process.argv.slice(2);
+const TURNS = +turnsS;
+const seed = +seedS;
 let rs = seed >>> 0;
 const rnd = () => (rs = (rs * 1664525 + 1013904223) >>> 0) / 4294967296;
 const pick = <T>(a: T[]) => a[Math.floor(rnd() * a.length)];
 
 const ws = new WebSocket(url);
 let game: Game | null = null;
-let me = -1,
-  next = 0,
-  desyncs = 0,
-  errors = 0;
+let me = -1;
+let next = 0;
+let desyncs = 0;
+let errors = 0;
 const turns: SeatIntent[][] = [];
 const out = (m: unknown) => ws.readyState === 1 && ws.send(JSON.stringify(m));
 const sendI = (i: Intent) => out({ t: 'i', i });
 
 function randomOrders(g: Game) {
-  const G = g.world,
-    p = G.players[me];
+  const G = g.world;
+  const p = G.players[me];
   if (!p.alive) return;
-  const mine = G.units.filter((u) => u.owner === me && !u.dead);
-  const others = G.players.filter((q) => q.id !== me && q.alive).map((q) => q.id);
+  const mine = G.units.filter(u => u.owner === me && !u.dead);
+  const others = G.players.filter(q => q.id !== me && q.alive).map(q => q.id);
   const r = rnd();
   if (r < 0.18)
-    sendI({ t: 'train', type: pick(['inf', 'inf', 'raid', 'siege', 'wagon'] as const) });
+    sendI({
+      t: 'train',
+      type: pick(['inf', 'inf', 'raid', 'siege', 'wagon'] as const),
+    });
   else if (r < 0.32 && mine.length) {
-    const ids = mine.filter(() => rnd() < 0.5).map((u) => u.id);
+    const ids = mine.filter(() => rnd() < 0.5).map(u => u.id);
     const h = p.hq;
     sendI({
       t: 'move',
@@ -49,25 +51,31 @@ function randomOrders(g: Game) {
       mode: rnd() < 0.5 ? 'move' : 'amove',
     });
   } else if (r < 0.4 && mine.length) {
-    const foe = G.units.find((u) => u.owner !== me && !u.dead);
-    if (foe) sendI({ t: 'attack', ids: mine.slice(0, 6).map((u) => u.id), target: foe.id });
+    const foe = G.units.find(u => u.owner !== me && !u.dead);
+    if (foe)
+      sendI({
+        t: 'attack',
+        ids: mine.slice(0, 6).map(u => u.id),
+        target: foe.id,
+      });
   } else if (r < 0.48) {
     for (let k = 0; k < 40; k++) {
-      const x = p.hq.x + Math.floor(rnd() * 24 - 12),
-        y = p.hq.y + Math.floor(rnd() * 24 - 12);
+      const x = p.hq.x + Math.floor(rnd() * 24 - 12);
+      const y = p.hq.y + Math.floor(rnd() * 24 - 12);
       if (!g.buildError(me, x, y)) {
         sendI({ t: 'build', x, y });
         break;
       }
     }
-  } else if (r < 0.53 && mine.length) sendI({ t: 'squad', ids: mine.map((u) => u.id) });
+  } else if (r < 0.53 && mine.length)
+    sendI({ t: 'squad', ids: mine.map(u => u.id) });
   else if (r < 0.56 && mine.length)
     sendI({
       t: 'unsquad',
       ids: mine
-        .filter((u) => u.n > 1)
+        .filter(u => u.n > 1)
         .slice(0, 1)
-        .map((u) => u.id),
+        .map(u => u.id),
     });
   else if (r < 0.62 && others.length) sendI({ t: 'ally', to: pick(others) });
   else if (r < 0.64 && others.length) sendI({ t: 'unally', to: pick(others) });
@@ -85,11 +93,19 @@ function randomOrders(g: Game) {
       k: pick(['hi', 'peace', 'together', 'help', 'thanks', 'warn'] as const),
     });
   else if (r < 0.78)
-    sendI({ t: 'ping', x: p.hq.x + 3, y: p.hq.y, k: pick(['attack', 'help', 'retreat'] as const) });
+    sendI({
+      t: 'ping',
+      x: p.hq.x + 3,
+      y: p.hq.y,
+      k: pick(['attack', 'help', 'retreat'] as const),
+    });
   else if (r < 0.81)
     sendI(
       p.res.crystal >= 3 && !p.doc
-        ? { t: 'doctrine', d: pick(['guild', 'shadow', 'forge', 'land'] as const) }
+        ? {
+            t: 'doctrine',
+            d: pick(['guild', 'shadow', 'forge', 'land'] as const),
+          }
         : { t: 'perk', i: rnd() < 0.5 ? 0 : 1 },
     );
   else if (r < 0.83)
@@ -106,8 +122,15 @@ function randomOrders(g: Game) {
       to: pick(['wood', 'steel', 'food'] as const),
     });
   else if (r < 0.9) {
-    const b = G.buildings.find((b) => b.owner === me && b.type === 'depot' && !b.spec);
-    if (b) sendI({ t: 'spec', b: b.id, s: pick(['forge', 'barracks', 'fort'] as const) });
+    const b = G.buildings.find(
+      b => b.owner === me && b.type === 'depot' && !b.spec,
+    );
+    if (b)
+      sendI({
+        t: 'spec',
+        b: b.id,
+        s: pick(['forge', 'barracks', 'fort'] as const),
+      });
   }
 }
 
@@ -142,9 +165,9 @@ function pump(g: Game) {
           desyncs,
           errors,
           units: G.units.length,
-          squads: G.units.filter((u) => u.n > 1).length,
+          squads: G.units.filter(u => u.n > 1).length,
           pacts: G.pacts.length,
-          alive: G.players.filter((p) => p.alive).length,
+          alive: G.players.filter(p => p.alive).length,
           over: G.over,
         }),
       );
@@ -155,7 +178,7 @@ function pump(g: Game) {
 }
 
 ws.onopen = () => out({ t: 'hello', nick });
-ws.onmessage = (e) => {
+ws.onmessage = e => {
   const m: ServerMsg = JSON.parse(String(e.data));
   if (m.t === 'welcome') out({ t: 'quick' });
   else if (m.t === 'start' && !game) {
