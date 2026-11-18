@@ -8,8 +8,8 @@
     "module": "ESNext",
     "types": ["node"],
     "paths": {
-      "@caspen13/arteries-protocol": ["../arteries-protocol/src/index.ts"],
-      "@caspen13/arteries-types": ["../arteries-types/src/index.ts"]
+      "@kingmap-rts/arteries-protocol": ["../arteries-protocol/src/index.ts"],
+      "@kingmap-rts/arteries-types": ["../arteries-types/src/index.ts"]
     }
   },
   "include": ["src/**/*", "test/**/*", "vitest.config.ts"]

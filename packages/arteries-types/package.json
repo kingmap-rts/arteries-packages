@@ -1,5 +1,5 @@
 {
-  "name": "@caspen13/arteries-types",
+  "name": "@kingmap-rts/arteries-types",
   "version": "0.1.0",
   "description": "Every type and shared constant of «Артерії»: game vocabulary, intents, messages, world, rule shapes, WebSocket protocol, replays and the backend HTTP API",
   "main": "./lib/index.js",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Caspen13/arteries-packages",
+    "url": "https://github.com/kingmap-rts/arteries-packages",
     "directory": "packages/arteries-types"
   },
   "license": "UNLICENSED",

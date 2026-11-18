@@ -1,7 +1,7 @@
 /** Map size, terrain and deposit codes and realm colours (the client names the realms). */
-import { Limits } from '@caspen13/arteries-types';
+import { Limits } from '@kingmap-rts/arteries-types';
 
-export { Deposit, Terrain } from '@caspen13/arteries-types';
+export { Deposit, Terrain } from '@kingmap-rts/arteries-types';
 
 /** seats on the ring of start positions (people + bots) */
 export const SEATS = Limits.MaxPlayers;

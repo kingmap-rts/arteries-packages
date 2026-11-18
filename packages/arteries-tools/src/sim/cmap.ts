@@ -1,8 +1,8 @@
 // Draws the map of a seed as an SVG (terrain, mana, springs, castles).
-//   yarn workspace @caspen13/arteries-tools cmap <seed> [out.svg]
+//   yarn workspace @kingmap-rts/arteries-tools cmap <seed> [out.svg]
 import { writeFileSync } from 'node:fs';
-import { createGame } from '@caspen13/arteries-core';
-import { Deposit, Terrain } from '@caspen13/arteries-types';
+import { createGame } from '@kingmap-rts/arteries-core';
+import { Deposit, Terrain } from '@kingmap-rts/arteries-types';
 
 const seed = +(process.argv[2] ?? 1);
 const out = process.argv[3] ?? `out/cmap${seed}.svg`;

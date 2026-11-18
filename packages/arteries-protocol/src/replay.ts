@@ -1,4 +1,4 @@
-import { Limits, type Intent, type Replay } from '@caspen13/arteries-types';
+import { Limits, type Intent, type Replay } from '@kingmap-rts/arteries-types';
 import { cleanIntent } from './intent';
 
 /** Shape check for replays uploaded by clients (local games). */

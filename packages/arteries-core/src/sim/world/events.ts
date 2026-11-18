@@ -1,5 +1,5 @@
 /** Match log, timeline snapshots and player notices. */
-import type { GameMessage } from '@caspen13/arteries-types';
+import type { GameMessage } from '@kingmap-rts/arteries-types';
 import { SEATS } from '../config/map';
 import { G } from '../state';
 

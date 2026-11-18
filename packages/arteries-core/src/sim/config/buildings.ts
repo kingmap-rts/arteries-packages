@@ -6,7 +6,7 @@ import type {
   SiteType,
   SpecSpec,
   SpecType,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 
 export const BUILDINGS: Record<BuildingType, BuildingSpec> = {
   hq: { hp: 900, icon: '★' },

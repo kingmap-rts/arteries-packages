@@ -1,4 +1,4 @@
-import { Limits } from '@caspen13/arteries-types';
+import { Limits } from '@kingmap-rts/arteries-types';
 
 /** Spread human seats around the ring of start positions. */
 export function spreadSeats(

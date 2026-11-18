@@ -23,47 +23,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@caspen13/arteries-core@workspace:^, @caspen13/arteries-core@workspace:packages/arteries-core":
-  version: 0.0.0-use.local
-  resolution: "@caspen13/arteries-core@workspace:packages/arteries-core"
-  dependencies:
-    "@caspen13/arteries-protocol": "workspace:^"
-    "@caspen13/arteries-types": "workspace:^"
-    "@types/node": "npm:^22.0.0"
-    typescript: "npm:^5.6.3"
-    vitest: "npm:^3.2.4"
-  languageName: unknown
-  linkType: soft
-
-"@caspen13/arteries-protocol@workspace:^, @caspen13/arteries-protocol@workspace:packages/arteries-protocol":
-  version: 0.0.0-use.local
-  resolution: "@caspen13/arteries-protocol@workspace:packages/arteries-protocol"
-  dependencies:
-    "@caspen13/arteries-types": "workspace:^"
-    typescript: "npm:^5.6.3"
-  languageName: unknown
-  linkType: soft
-
-"@caspen13/arteries-tools@workspace:packages/arteries-tools":
-  version: 0.0.0-use.local
-  resolution: "@caspen13/arteries-tools@workspace:packages/arteries-tools"
-  dependencies:
-    "@caspen13/arteries-core": "workspace:^"
-    "@caspen13/arteries-types": "workspace:^"
-    "@types/node": "npm:^22.0.0"
-    tsx: "npm:^4.19.0"
-    typescript: "npm:^5.6.3"
-  languageName: unknown
-  linkType: soft
-
-"@caspen13/arteries-types@workspace:^, @caspen13/arteries-types@workspace:packages/arteries-types":
-  version: 0.0.0-use.local
-  resolution: "@caspen13/arteries-types@workspace:packages/arteries-types"
-  dependencies:
-    typescript: "npm:^5.6.3"
-  languageName: unknown
-  linkType: soft
-
 "@emnapi/core@npm:^1.1.0":
   version: 1.11.3
   resolution: "@emnapi/core@npm:1.11.3"
@@ -408,6 +367,47 @@ __metadata:
   checksum: 10c0/b5be700e45a775f218589c3466c4ffea630582b4988657652da464e5ab8a7d18bf928ee4fd2363fb346ede4bea9c6ff0bae05a538358c4565ece6199531b5f72
   languageName: node
   linkType: hard
+
+"@kingmap-rts/arteries-core@workspace:^, @kingmap-rts/arteries-core@workspace:packages/arteries-core":
+  version: 0.0.0-use.local
+  resolution: "@kingmap-rts/arteries-core@workspace:packages/arteries-core"
+  dependencies:
+    "@kingmap-rts/arteries-protocol": "workspace:^"
+    "@kingmap-rts/arteries-types": "workspace:^"
+    "@types/node": "npm:^22.0.0"
+    typescript: "npm:^5.6.3"
+    vitest: "npm:^3.2.4"
+  languageName: unknown
+  linkType: soft
+
+"@kingmap-rts/arteries-protocol@workspace:^, @kingmap-rts/arteries-protocol@workspace:packages/arteries-protocol":
+  version: 0.0.0-use.local
+  resolution: "@kingmap-rts/arteries-protocol@workspace:packages/arteries-protocol"
+  dependencies:
+    "@kingmap-rts/arteries-types": "workspace:^"
+    typescript: "npm:^5.6.3"
+  languageName: unknown
+  linkType: soft
+
+"@kingmap-rts/arteries-tools@workspace:packages/arteries-tools":
+  version: 0.0.0-use.local
+  resolution: "@kingmap-rts/arteries-tools@workspace:packages/arteries-tools"
+  dependencies:
+    "@kingmap-rts/arteries-core": "workspace:^"
+    "@kingmap-rts/arteries-types": "workspace:^"
+    "@types/node": "npm:^22.0.0"
+    tsx: "npm:^4.19.0"
+    typescript: "npm:^5.6.3"
+  languageName: unknown
+  linkType: soft
+
+"@kingmap-rts/arteries-types@workspace:^, @kingmap-rts/arteries-types@workspace:packages/arteries-types":
+  version: 0.0.0-use.local
+  resolution: "@kingmap-rts/arteries-types@workspace:packages/arteries-types"
+  dependencies:
+    typescript: "npm:^5.6.3"
+  languageName: unknown
+  linkType: soft
 
 "@lerna/create@npm:8.2.4":
   version: 8.2.4

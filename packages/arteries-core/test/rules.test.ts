@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Lockstep, Terrain } from '@caspen13/arteries-types';
+import { Lockstep, Terrain } from '@kingmap-rts/arteries-types';
 import { createGame, rules } from '../src/index';
 
 describe('intents', () => {

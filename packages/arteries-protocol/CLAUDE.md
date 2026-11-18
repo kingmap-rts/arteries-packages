@@ -1,7 +1,7 @@
 # arteries-protocol — conventions
 
 Validators for everything a player can send to the server, plus the seat layout. Types and the
-shared constants (`Limits`, `Lockstep`) come from `@caspen13/arteries-types`.
+shared constants (`Limits`, `Lockstep`) come from `@kingmap-rts/arteries-types`.
 
 - **No types defined here** — add them to arteries-types.
 - **Every new intent goes in two packages**: the `Intent` union in arteries-types, and

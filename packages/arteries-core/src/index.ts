@@ -1,10 +1,10 @@
 /**
- * @caspen13/arteries-core — the deterministic simulation of «Arteries».
+ * @kingmap-rts/arteries-core — the deterministic simulation of «Arteries».
  *
  * Lockstep: every client runs this core with the same seed, the server only relays player
  * intents per turn. Same seed + same intents in the same order = the same world everywhere
  * (compare Game.hash()). Types and shared constants (World, Intent, Lockstep, Terrain, …) come
- * from @caspen13/arteries-types.
+ * from @kingmap-rts/arteries-types.
  *
  *   const game = createGame({ seed: 42, humans: { 0: 'Anna' } });
  *   game.apply(0, { t: 'train', type: 'inf' }); // null, or a GameMessage such as { key: 'error.noResources' }

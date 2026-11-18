@@ -15,9 +15,9 @@
     "clean": "lerna run clean",
     "test": "lerna run test --stream",
     "typecheck": "lerna run typecheck",
-    "publish:types": "dotenv -- yarn workspace @caspen13/arteries-types npm publish",
-    "publish:protocol": "dotenv -- yarn workspace @caspen13/arteries-protocol npm publish",
-    "publish:core": "dotenv -- yarn workspace @caspen13/arteries-core npm publish",
+    "publish:types": "dotenv -- yarn workspace @kingmap-rts/arteries-types npm publish",
+    "publish:protocol": "dotenv -- yarn workspace @kingmap-rts/arteries-protocol npm publish",
+    "publish:core": "dotenv -- yarn workspace @kingmap-rts/arteries-core npm publish",
     "format": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",
     "check-formatting": "prettier -l \"**/*.{js,ts,json,md,yml,yaml}\"",
     "fix-formatting": "prettier --write \"**/*.{js,ts,json,md,yml,yaml}\"",
@@ -26,13 +26,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Caspen13/arteries-packages.git"
+    "url": "git+https://github.com/kingmap-rts/arteries-packages.git"
   },
-  "author": "Caspen13",
+  "author": "kingmap-rts",
   "license": "UNLICENSED",
-  "homepage": "https://github.com/Caspen13/arteries-packages#readme",
+  "homepage": "https://github.com/kingmap-rts/arteries-packages#readme",
   "bugs": {
-    "url": "https://github.com/Caspen13/arteries-packages/issues"
+    "url": "https://github.com/kingmap-rts/arteries-packages/issues"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

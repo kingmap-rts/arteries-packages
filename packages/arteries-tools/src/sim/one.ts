@@ -1,4 +1,4 @@
-// quick single match: yarn workspace @caspen13/arteries-tools one [seed] [maxT]
+// quick single match: yarn workspace @kingmap-rts/arteries-tools one [seed] [maxT]
 import { runMatch } from './match.ts';
 const r = runMatch({
   seed: +(process.argv[2] || 42),

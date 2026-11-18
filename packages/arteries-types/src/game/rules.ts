@@ -1,4 +1,4 @@
-// The shapes of the rule tables (the numbers live in @caspen13/arteries-core → rules).
+// The shapes of the rule tables (the numbers live in @kingmap-rts/arteries-core → rules).
 import type { PathId, PerkId, Resource, UnitType } from './vocabulary';
 
 export interface UnitSpec {

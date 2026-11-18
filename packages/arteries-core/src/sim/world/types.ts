@@ -1,10 +1,10 @@
 /**
- * Types of the simulated world. The shared ones live in @caspen13/arteries-types and are
+ * Types of the simulated world. The shared ones live in @kingmap-rts/arteries-types and are
  * re-exported here for the simulation's own imports; Match and NewGameOptions are internal.
  */
-import type { Site, Tile, World } from '@caspen13/arteries-types';
+import type { Site, Tile, World } from '@kingmap-rts/arteries-types';
 
-export type * from '@caspen13/arteries-types';
+export type * from '@kingmap-rts/arteries-types';
 
 export interface NewGameOptions {
   seed?: number;

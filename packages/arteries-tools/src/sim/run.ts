@@ -1,6 +1,6 @@
 // Parallel headless experiments.
-//   yarn workspace @caspen13/arteries-tools sim doctrines 14 2100 out/doctrines.jsonl
-//   yarn workspace @caspen13/arteries-tools sim control 20 1200 out/control.jsonl
+//   yarn workspace @kingmap-rts/arteries-tools sim doctrines 14 2100 out/doctrines.jsonl
+//   yarn workspace @kingmap-rts/arteries-tools sim control 20 1200 out/control.jsonl
 import { Worker, isMainThread, parentPort } from 'node:worker_threads';
 import { availableParallelism } from 'node:os';
 import { mkdirSync, writeFileSync, appendFileSync } from 'node:fs';

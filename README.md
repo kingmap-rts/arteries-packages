@@ -7,22 +7,22 @@ Monorepo of private packages of the «Артерії» game, shared by `arteries
 
 ## Packages
 
-| Package                                                                 | What it is                                                         | Used by                            |
-| ----------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
-| [`@caspen13/arteries-types`](./packages/arteries-types/README.md)       | every shared type + constant enums (protocol, world, HTTP API)     | everyone                           |
-| [`@caspen13/arteries-protocol`](./packages/arteries-protocol/README.md) | validators for what players send (`cleanIntent`, `cleanReplay`)    | backend                            |
-| [`@caspen13/arteries-core`](./packages/arteries-core/README.md)         | deterministic simulation (lockstep), rule tables for the renderers | front (+ backend for match checks) |
-| `@caspen13/arteries-tools` (private, not published)                     | balance and QA tools: headless bot matches, replay export, soak    | developers                         |
+| Package                                                                    | What it is                                                         | Used by                            |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
+| [`@kingmap-rts/arteries-types`](./packages/arteries-types/README.md)       | every shared type + constant enums (protocol, world, HTTP API)     | everyone                           |
+| [`@kingmap-rts/arteries-protocol`](./packages/arteries-protocol/README.md) | validators for what players send (`cleanIntent`, `cleanReplay`)    | backend                            |
+| [`@kingmap-rts/arteries-core`](./packages/arteries-core/README.md)         | deterministic simulation (lockstep), rule tables for the renderers | front (+ backend for match checks) |
+| `@kingmap-rts/arteries-tools` (private, not published)                     | balance and QA tools: headless bot matches, replay export, soak    | developers                         |
 
 Types live only in `arteries-types`; `arteries-protocol` and `arteries-core` depend on it.
-Import types from `@caspen13/arteries-types`, validators from the protocol, the simulation from the core.
+Import types from `@kingmap-rts/arteries-types`, validators from the protocol, the simulation from the core.
 
 ## Prerequisites
 
 - Node.js `>= 22`
 - Yarn `4.x` (via Corepack: `corepack enable`)
 - A GitHub Personal Access Token with `read:packages` (to install) and `write:packages`
-  (to publish), with access to the `Caspen13/arteries-packages` repo.
+  (to publish), with access to the `kingmap-rts/arteries-packages` repo.
 
 ## Setup (this repo)
 
@@ -51,7 +51,7 @@ The token is read from the `GITHUB_TOKEN` env var by both `.npmrc` and `.yarnrc.
 In `arteries-front` / `arteries-backend`, add an `.npmrc` at the repo root:
 
 ```
-@caspen13:registry=https://npm.pkg.github.com
+@kingmap-rts:registry=https://npm.pkg.github.com
 always-auth=true
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
@@ -60,9 +60,9 @@ Then export the token and install:
 
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
-yarn add @caspen13/arteries-types         # everyone: types and shared constants
-yarn add @caspen13/arteries-core          # front (and backend for match checks)
-yarn add @caspen13/arteries-protocol      # backend: validators
+yarn add @kingmap-rts/arteries-types         # everyone: types and shared constants
+yarn add @kingmap-rts/arteries-core          # front (and backend for match checks)
+yarn add @kingmap-rts/arteries-protocol      # backend: validators
 ```
 
 For CI and Docker builds, pass `GITHUB_TOKEN` as a secret rather than committing it.
@@ -71,11 +71,11 @@ For CI and Docker builds, pass `GITHUB_TOKEN` as a secret rather than committing
 
 ```bash
 yarn build                                                     # tools run on the built core
-yarn workspace @caspen13/arteries-tools sim doctrines 14 2100 out/doctrines.jsonl
-yarn workspace @caspen13/arteries-tools one 42 1500            # one quick bot match
-yarn workspace @caspen13/arteries-tools cmap 7                 # map of a seed → out/cmap7.svg
-yarn workspace @caspen13/arteries-tools replay:export ../arteries-data/replays out/replays
-yarn workspace @caspen13/arteries-tools net:soak ws://localhost:8787/ws 6 900   # needs a running backend
+yarn workspace @kingmap-rts/arteries-tools sim doctrines 14 2100 out/doctrines.jsonl
+yarn workspace @kingmap-rts/arteries-tools one 42 1500            # one quick bot match
+yarn workspace @kingmap-rts/arteries-tools cmap 7                 # map of a seed → out/cmap7.svg
+yarn workspace @kingmap-rts/arteries-tools replay:export ../arteries-data/replays out/replays
+yarn workspace @kingmap-rts/arteries-tools net:soak ws://localhost:8787/ws 6 900   # needs a running backend
 python3 packages/arteries-tools/src/sim/an_ai.py out/ai_old.jsonl out/ai_new.jsonl
 ```
 
@@ -88,9 +88,9 @@ mkdir -p packages/arteries-<name>/src
 ```
 
 Copy `packages/arteries-protocol/{package.json,tsconfig.json}` as a template, rename to
-`@caspen13/arteries-<name>`, add a `publish:<name>` script to the root `package.json`, then
+`@kingmap-rts/arteries-<name>`, add a `publish:<name>` script to the root `package.json`, then
 `yarn install` to wire up the workspace. Cross-package deps use the workspace protocol, e.g.
-`"@caspen13/arteries-protocol": "workspace:^"`.
+`"@kingmap-rts/arteries-protocol": "workspace:^"`.
 
 ## Publishing
 
@@ -98,7 +98,7 @@ Versions are **independent** per package (`lerna.json`). Publishing runs in **Gi
 (`.github/workflows/release.yml`) with the repository's own token — nobody needs a personal
 token to release:
 
-1. bump the version in the package's `package.json` (`yarn workspace @caspen13/arteries-core version minor`);
+1. bump the version in the package's `package.json` (`yarn workspace @kingmap-rts/arteries-core version minor`);
 2. merge to `main`.
 
 The workflow builds, runs the tests and publishes every package whose version is not in the
@@ -112,6 +112,6 @@ from the Actions tab. Local fallback with a PAT (`write:packages`) in `.env`:
 
 ## Scope
 
-GitHub Packages requires the package scope to match the owner of the repository: the repo
-lives in `Caspen13`, so the scope is `@caspen13`. Moving the repos to a GitHub organization
-means renaming the scope (package names, `.npmrc`, `.yarnrc.yml`, imports).
+GitHub Packages requires the package scope to match the owner of the repository: the repos
+live in the `kingmap-rts` organization, so the scope is `@kingmap-rts`. Moving them to another
+owner means renaming the scope (package names, `.npmrc`, `.yarnrc.yml`, imports) and republishing.

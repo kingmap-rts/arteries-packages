@@ -1,5 +1,5 @@
 {
-  "name": "@caspen13/arteries-tools",
+  "name": "@kingmap-rts/arteries-tools",
   "version": "0.1.0",
   "private": true,
   "description": "Balance and QA tools for «Артерії»: headless bot matches, replay export, online soak tests (not published)",
@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@caspen13/arteries-core": "workspace:^",
-    "@caspen13/arteries-types": "workspace:^"
+    "@kingmap-rts/arteries-core": "workspace:^",
+    "@kingmap-rts/arteries-types": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

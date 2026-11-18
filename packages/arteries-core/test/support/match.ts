@@ -1,5 +1,5 @@
 // Runs one headless bot-vs-bot match and returns a compact summary.
-import type { BotParams } from '@caspen13/arteries-types';
+import type { BotParams } from '@kingmap-rts/arteries-types';
 import { createGame, rules } from '../../src/index';
 
 export interface MatchSpec {

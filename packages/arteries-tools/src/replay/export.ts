@@ -1,5 +1,5 @@
 // Replays → CSV tables for analysis (pandas / R).
-//   yarn workspace @caspen13/arteries-tools replay:export <folder-with-replays> [out-folder]
+//   yarn workspace @kingmap-rts/arteries-tools replay:export <folder-with-replays> [out-folder]
 // Writes matches.csv (one row per match), players.csv (one row per player per match),
 // minutes.csv (every player every minute) and intents.csv (what humans clicked, by tick).
 import { readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';

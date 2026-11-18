@@ -8,7 +8,7 @@ import {
   type SpecType,
   type TradeResource,
   type UnitType,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 
 const PLAYER_INTENTS = new Set<string>([
   'move',

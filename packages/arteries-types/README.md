@@ -1,4 +1,4 @@
-# @caspen13/arteries-types
+# @kingmap-rts/arteries-types
 
 Every type and shared constant of «Артерії», for every project: the front end, the backend,
 the core, the tools. Import types from here, not from the packages that use them.
@@ -23,8 +23,8 @@ import {
   Terrain,
   type Intent,
   type ServerMsg,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 ```
 
-Validators (`cleanIntent`, `cleanReplay`) are in `@caspen13/arteries-protocol`; the simulation
-and the rule numbers are in `@caspen13/arteries-core`.
+Validators (`cleanIntent`, `cleanReplay`) are in `@kingmap-rts/arteries-protocol`; the simulation
+and the rule numbers are in `@kingmap-rts/arteries-core`.

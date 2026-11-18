@@ -1,13 +1,13 @@
 // A headless online player: joins a quick match, simulates every turn like the browser does, sends random
 // orders that exercise every mechanic, reports hashes, and prints its final state hash as JSON.
-//   yarn workspace @caspen13/arteries-tools net:client ws://localhost:8787/ws Name uk|en turns seed
-import { createGame, type Game } from '@caspen13/arteries-core';
+//   yarn workspace @kingmap-rts/arteries-tools net:client ws://localhost:8787/ws Name uk|en turns seed
+import { createGame, type Game } from '@kingmap-rts/arteries-core';
 import {
   Lockstep,
   type Intent,
   type SeatIntent,
   type ServerMsg,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 
 // the language argument is kept for old scripts; the core has no text, so it changes nothing
 const [url, nick, , turnsS, seedS] = process.argv.slice(2);

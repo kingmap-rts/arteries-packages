@@ -1,6 +1,6 @@
 // The only place the golden test touches the core API: adapt it here when the API changes,
 // the recorded fixtures stay as they are.
-import type { Intent } from '@caspen13/arteries-types';
+import type { Intent } from '@kingmap-rts/arteries-types';
 import { createGame } from '../../src/index';
 
 export interface Driver {

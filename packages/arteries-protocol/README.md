@@ -1,7 +1,7 @@
-# @caspen13/arteries-protocol
+# @kingmap-rts/arteries-protocol
 
 The runtime half of the contract between the game server and the browser — no types here
-(they are in `@caspen13/arteries-types`):
+(they are in `@kingmap-rts/arteries-types`):
 
 - `cleanIntent(x)` — strict validator for what a player sends; returns a clean `Intent` or null
   ('leave' is server-only and always rejected);
@@ -9,8 +9,8 @@ The runtime half of the contract between the game server and the browser — no 
 - `spreadSeats(k)` — spreads human seats around the ring of start positions.
 
 ```ts
-import { cleanIntent } from '@caspen13/arteries-protocol';
-import type { ClientMsg } from '@caspen13/arteries-types';
+import { cleanIntent } from '@kingmap-rts/arteries-protocol';
+import type { ClientMsg } from '@kingmap-rts/arteries-types';
 
 const m: ClientMsg = JSON.parse(data);
 if (m.t === 'i') {

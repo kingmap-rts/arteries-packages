@@ -6,7 +6,7 @@ modelled on `land-packages`. Each package has its own `CLAUDE.md` with conventio
 
 ## Where types go
 
-All types shared between projects live in `@caspen13/arteries-types` — nowhere else:
+All types shared between projects live in `@kingmap-rts/arteries-types` — nowhere else:
 
 - every backend endpoint: request bodies, query/params, responses, WebSocket messages
   (`api/`, `net/` in the package);
@@ -31,7 +31,7 @@ Corepack) with `nodeLinker: node-modules`.
 - Workspace packages depend on each other with `"workspace:*"` (or `"workspace:^"` for
   published packages).
 - `yarn.lock` is committed. CI and Docker install with `yarn install --immutable`.
-- `@caspen13/*` packages come from GitHub Packages (see `.yarnrc.yml`): export `GITHUB_TOKEN`
+- `@kingmap-rts/*` packages come from GitHub Packages (see `.yarnrc.yml`): export `GITHUB_TOKEN`
   (a PAT with `read:packages`) before installing them. Never commit the token.
 
 ## Commands

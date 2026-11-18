@@ -1,8 +1,8 @@
 // Re-simulate a replay with the core and collect stats along the way.
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { createGame } from '@caspen13/arteries-core';
-import type { Replay } from '@caspen13/arteries-types';
+import { createGame } from '@kingmap-rts/arteries-core';
+import type { Replay } from '@kingmap-rts/arteries-types';
 
 export function loadReplay(file: string): Replay {
   const buf = readFileSync(file);

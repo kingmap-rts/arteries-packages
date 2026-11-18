@@ -1,5 +1,5 @@
 {
-  "name": "@caspen13/arteries-core",
+  "name": "@kingmap-rts/arteries-core",
   "version": "0.4.0",
   "description": "Deterministic simulation of «Артерії» (lockstep): the same seed and intents give the same world in the browser and on the server",
   "main": "./lib/index.js",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Caspen13/arteries-packages",
+    "url": "https://github.com/kingmap-rts/arteries-packages",
     "directory": "packages/arteries-core"
   },
   "license": "UNLICENSED",
@@ -41,8 +41,8 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@caspen13/arteries-protocol": "workspace:^",
-    "@caspen13/arteries-types": "workspace:^"
+    "@kingmap-rts/arteries-protocol": "workspace:^",
+    "@kingmap-rts/arteries-types": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

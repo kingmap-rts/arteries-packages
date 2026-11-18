@@ -1,6 +1,6 @@
 // Online soak test against a running server: several headless players on one quick match must
 // end on the same state hash.
-//   yarn workspace @caspen13/arteries-tools net:soak ws://localhost:8787/ws [players=6] [turns=900]
+//   yarn workspace @kingmap-rts/arteries-tools net:soak ws://localhost:8787/ws [players=6] [turns=900]
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 

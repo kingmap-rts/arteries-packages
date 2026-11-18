@@ -4,7 +4,7 @@ import type {
   PathSpec,
   PerkId,
   PerkSpec,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 
 // Chosen in the match with mana crystals. Tier 1 (3💎): trait + unique unit. Tiers 2-4: pick one of two.
 export const PATH_COST: number[] = [3, 4, 6, 9];

@@ -1,5 +1,5 @@
 /** Unit types and the numbers of wagons, bandits and ammunition. */
-import type { UnitSpec, UnitType } from '@caspen13/arteries-types';
+import type { UnitSpec, UnitType } from '@kingmap-rts/arteries-types';
 
 export const UNITS: Record<UnitType, UnitSpec> = {
   inf: {

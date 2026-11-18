@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { UnitType } from '@caspen13/arteries-types';
+import type { UnitType } from '@kingmap-rts/arteries-types';
 import { createGame, rules, type Game } from '../src/index';
 import { memberLoss } from '../src/sim/systems/squads';
 

@@ -1,11 +1,11 @@
-# @caspen13/arteries-core
+# @kingmap-rts/arteries-core
 
 The deterministic simulation of «Arteries». The browser runs it to play; the server can run it
 to re-simulate a match from its replay. Same seed + same intents in the same order = the same
 world everywhere.
 
 ```ts
-import { createGame, rules } from '@caspen13/arteries-core';
+import { createGame, rules } from '@kingmap-rts/arteries-core';
 
 const game = createGame({ seed: 42, diff: 1, humans: { 0: 'Anna' } });
 

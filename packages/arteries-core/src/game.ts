@@ -6,7 +6,7 @@ import {
   type Difficulty,
   type GameMessage,
   type Intent,
-} from '@caspen13/arteries-types';
+} from '@kingmap-rts/arteries-types';
 import { DEFAULT_BOT_PARAMS } from './sim/config/ai';
 import { MAP_H, MAP_W } from './sim/config/map';
 import { buildCheck } from './sim/commands/build';
