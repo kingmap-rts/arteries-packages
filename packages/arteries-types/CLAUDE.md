@@ -1,6 +1,6 @@
 # arteries-types — conventions
 
-The one place for types shared by the projects of «Артерії». Every other package and app
+The one place for types shared by the projects of Kings Map. Every other package and app
 imports its types from here.
 
 - **Types and constant enums only, no logic.** A function belongs in arteries-protocol

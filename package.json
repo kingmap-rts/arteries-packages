@@ -2,7 +2,7 @@
   "name": "arteries-packages",
   "version": "1.0.0",
   "private": true,
-  "description": "Private packages of the «Артерії» game shared by arteries-front and arteries-backend",
+  "description": "Private packages of the Kings Map game shared by arteries-front and arteries-backend",
   "engines": {
     "node": ">=22.0.0"
   },

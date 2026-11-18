@@ -1,6 +1,6 @@
 # @kingmap-rts/arteries-types
 
-Every type and shared constant of «Артерії», for every project: the front end, the backend,
+Every type and shared constant of Kings Map, for every project: the front end, the backend,
 the core, the tools. Import types from here, not from the packages that use them.
 
 | Area              | What                                                                                                       |

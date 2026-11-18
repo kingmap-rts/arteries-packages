@@ -1,6 +1,6 @@
 # arteries-packages — notes for Claude
 
-Private packages of «Артерії» published to GitHub Packages (Yarn workspaces + lerna),
+Private packages of Kings Map published to GitHub Packages (Yarn workspaces + lerna),
 modelled on `land-packages`. Each package has its own `CLAUDE.md` with conventions:
 `packages/arteries-protocol`, `packages/arteries-core`.
 

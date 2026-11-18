@@ -1,7 +1,7 @@
 {
   "name": "@kingmap-rts/arteries-types",
   "version": "0.3.0",
-  "description": "Every type and shared constant of «Артерії»: game vocabulary, intents, messages, world, rule shapes, WebSocket protocol, replays and the backend HTTP API",
+  "description": "Every type and shared constant of Kings Map: game vocabulary, intents, messages, world, rule shapes, WebSocket protocol, replays and the backend HTTP API",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [

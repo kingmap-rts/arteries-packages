@@ -1,5 +1,5 @@
 /**
- * @kingmap-rts/arteries-types — every type shared by the projects of «Артерії»: the game's
+ * @kingmap-rts/arteries-types — every type shared by the projects of Kings Map: the game's
  * vocabulary, intents and messages, the world the simulation produces, the rule table shapes,
  * the WebSocket protocol, replays, the backend's HTTP API and player accounts — plus the shared constants as
  * enums (lockstep clock, limits, map codes). No logic here.

@@ -1,6 +1,6 @@
 # arteries-packages
 
-Monorepo of private packages of the «Артерії» game, shared by `arteries-front` and
+Monorepo of private packages of the Kings Map game, shared by `arteries-front` and
 `arteries-backend`, managed with [Yarn workspaces](https://yarnpkg.com/features/workspaces) +
 [lerna](https://lerna.js.org/) and published to the private
 [GitHub Packages](https://npm.pkg.github.com) registry.

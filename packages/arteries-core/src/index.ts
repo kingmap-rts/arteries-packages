@@ -1,5 +1,5 @@
 /**
- * @kingmap-rts/arteries-core — the deterministic simulation of «Arteries».
+ * @kingmap-rts/arteries-core — the deterministic simulation of Kings Map.
  *
  * Lockstep: every client runs this core with the same seed, the server only relays player
  * intents per turn. Same seed + same intents in the same order = the same world everywhere
