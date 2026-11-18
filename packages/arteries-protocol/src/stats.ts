@@ -1,8 +1,12 @@
-import { Limits, type Intent, type Replay } from '@kingmap-rts/arteries-types';
+import {
+  Limits,
+  type Intent,
+  type MatchStats,
+} from '@kingmap-rts/arteries-types';
 import { cleanIntent } from './intent';
 
-/** Shape check for replays uploaded by clients (local games). */
-export function cleanReplay(x: any): Replay | null {
+/** Shape check for match statistics uploaded by clients (local games). */
+export function cleanMatchStats(x: any): MatchStats | null {
   if (!x || typeof x !== 'object' || x.v !== 1 || x.mode !== 'local')
     return null;
   if (
@@ -14,7 +18,7 @@ export function cleanReplay(x: any): Replay | null {
   )
     return null;
   if (!Array.isArray(x.turns) || x.turns.length > x.ticks + 1) return null;
-  const turns: Replay['turns'] = [];
+  const turns: MatchStats['turns'] = [];
   for (const t of x.turns) {
     if (!Array.isArray(t) || !Number.isInteger(t[0]) || !Array.isArray(t[1]))
       return null;

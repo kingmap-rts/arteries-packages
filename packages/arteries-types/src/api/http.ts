@@ -3,7 +3,7 @@
  *
  *   GET  /health          → 'ok' (text)
  *   GET  /api/online      → OnlineStats
- *   POST /api/replay      ← Replay (a local game)   → 202 kept · 204 too short · 400 · 413 · 429
+ *   POST /api/stats       ← MatchStats (a local game) → 202 kept · 204 too short · 400 · 413 · 429
  *   POST /api/feedback    ← FeedbackRequest          → 202 · 400 empty · 429
  *   POST /api/error       ← ClientErrorReport        → 204 · 400 · 429
  */

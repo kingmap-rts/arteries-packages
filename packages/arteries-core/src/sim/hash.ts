@@ -1,7 +1,7 @@
 /**
  * FNV-1a hash over every value that affects the simulation (not visuals). Clients compare it
- * every few seconds to detect desyncs; replays store it to verify a re-simulation.
- * Changing what goes in here changes every hash: old replays stop verifying.
+ * every few seconds to detect desyncs; match statistics store it to verify a re-simulation.
+ * Changing what goes in here changes every hash: old match statistics stop verifying.
  */
 import { PATHS } from './config/paths';
 import { RESOURCES } from './config/economy';

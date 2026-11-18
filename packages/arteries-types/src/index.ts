@@ -1,7 +1,7 @@
 /**
  * @kingmap-rts/arteries-types — every type shared by the projects of Kings Map: the game's
  * vocabulary, intents and messages, the world the simulation produces, the rule table shapes,
- * the WebSocket protocol, replays, the backend's HTTP API and player accounts — plus the shared constants as
+ * the WebSocket protocol, match statistics, the backend's HTTP API and player accounts — plus the shared constants as
  * enums (lockstep clock, limits, map codes). No logic here.
  */
 export * from './game/map';
@@ -15,5 +15,5 @@ export type * from './game/world';
 export type * from './game/rules';
 export type * from './game/match';
 export type * from './net/messages';
-export type * from './net/replay';
+export type * from './net/stats';
 export type * from './api/http';

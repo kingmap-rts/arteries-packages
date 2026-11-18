@@ -12,6 +12,6 @@ export enum Lockstep {
 export enum Limits {
   /** seats in a match (people + bots) */
   MaxPlayers = 10,
-  /** biggest replay a client may upload, bytes */
-  ReplayMaxBytes = 4 * 1024 * 1024,
+  /** biggest match statistics file a client may upload, bytes */
+  StatsMaxBytes = 4 * 1024 * 1024,
 }

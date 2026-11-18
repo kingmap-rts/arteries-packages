@@ -1,12 +1,12 @@
-// Replays → CSV tables for analysis (pandas / R).
-//   yarn workspace @kingmap-rts/arteries-tools replay:export <folder-with-replays> [out-folder]
+// Match statistics files → CSV tables for analysis (pandas / R).
+//   yarn workspace @kingmap-rts/arteries-tools stats:export <folder-with-stats> [out-folder]
 // Writes matches.csv (one row per match), players.csv (one row per player per match),
 // minutes.csv (every player every minute) and intents.csv (what humans clicked, by tick).
 import { readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadReplay, runReplay } from './replay.ts';
+import { loadStats, runStats } from './run.ts';
 
-const [inDir = 'replays', outDir = 'out/replays'] = process.argv.slice(2);
+const [inDir = 'stats', outDir = 'out/stats'] = process.argv.slice(2);
 const files: string[] = [];
 const walk = (d: string) => {
   for (const f of readdirSync(d)) {
@@ -37,9 +37,9 @@ const players: Record<string, unknown>[] = [];
 const minutes: Record<string, unknown>[] = [];
 const intents: Record<string, unknown>[] = [];
 for (const f of files) {
-  const rep = loadReplay(f);
+  const rep = loadStats(f);
   const t0 = Date.now();
-  const run = runReplay(rep);
+  const run = runStats(rep);
   const nh = Object.keys(rep.humans).length;
   matches.push({
     id: rep.id,
@@ -86,5 +86,5 @@ writeFileSync(join(outDir, 'players.csv'), csv(players));
 writeFileSync(join(outDir, 'minutes.csv'), csv(minutes));
 writeFileSync(join(outDir, 'intents.csv'), csv(intents));
 console.log(
-  `${files.length} replays → ${outDir}/{matches,players,minutes,intents}.csv`,
+  `${files.length} stats files → ${outDir}/{matches,players,minutes,intents}.csv`,
 );

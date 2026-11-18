@@ -5,7 +5,7 @@ import { startGolden } from './support/golden-driver';
 /**
  * Bit-exact regression: matches recorded with an earlier build must re-simulate to the very same
  * state hashes. A failure means the simulation changed: online games between versions would
- * desync and old replays would not play back. Regenerate the fixture only for intended changes.
+ * desync and old match statistics would not re-simulate. Regenerate the fixture only for intended changes.
  */
 const fixture = JSON.parse(
   readFileSync(new URL('./fixtures/golden.json', import.meta.url), 'utf8'),

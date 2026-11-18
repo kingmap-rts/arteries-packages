@@ -1,10 +1,10 @@
-// Re-simulate a replay with the core and collect stats along the way.
+// Re-simulate a match statistics file with the core and collect stats along the way.
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { createGame } from '@kingmap-rts/arteries-core';
-import type { Replay } from '@kingmap-rts/arteries-types';
+import type { MatchStats } from '@kingmap-rts/arteries-types';
 
-export function loadReplay(file: string): Replay {
+export function loadStats(file: string): MatchStats {
   const buf = readFileSync(file);
   return JSON.parse(
     (file.endsWith('.gz') ? gunzipSync(buf) : buf).toString('utf8'),
@@ -30,7 +30,7 @@ export interface MinuteRow {
   steel: number;
   food: number;
 }
-export interface ReplayRun {
+export interface StatsRun {
   /** every stored hash matched */
   ok: boolean;
   checked: number;
@@ -49,7 +49,7 @@ export interface ReplayRun {
 }
 
 /** Same loop as the client: apply turn n's intents, then simulate tick n. */
-export function runReplay(rep: Replay): ReplayRun {
+export function runStats(rep: MatchStats): StatsRun {
   const game = createGame({
     seed: rep.seed,
     diff: rep.diff,
@@ -59,7 +59,7 @@ export function runReplay(rep: Replay): ReplayRun {
   const turns = new Map(rep.turns.map(([n, list]) => [n, list]));
   const human = (s: number) => rep.humans[s] != null;
   const minutes: MinuteRow[] = [];
-  const intents: ReplayRun['intents'] = [];
+  const intents: StatsRun['intents'] = [];
   let checked = 0;
   let mismatchAt: number | null = null;
   for (let n = 0; n < rep.ticks; n++) {

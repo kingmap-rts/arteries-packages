@@ -26,7 +26,7 @@ never reads it. A new message needs its uk and en text in the front end's locale
 
 ## The golden test
 
-`test/golden.test.ts` replays 4 recorded matches (`test/fixtures/golden.json`) and compares the
+`test/golden.test.ts` re-plays 4 recorded matches (`test/fixtures/golden.json`) and compares the
 state hash every 100 ticks. It must stay green for refactors. When a change is **meant** to
 alter the simulation (balance, new mechanic): regenerate the fixture in the same PR, say so in
 the PR, and bump the **minor** version.

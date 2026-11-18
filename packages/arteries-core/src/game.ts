@@ -79,7 +79,7 @@ export class Game {
     return applyCommand(seat, intent);
   }
 
-  /** State hash for desync checks and replay verification. */
+  /** State hash for desync checks and for verifying match statistics. */
   hash(): string {
     this.use();
     return stateHash();

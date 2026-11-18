@@ -1,7 +1,7 @@
 # @kingmap-rts/arteries-core
 
 The deterministic simulation of Kings Map. The browser runs it to play; the server can run it
-to re-simulate a match from its replay. Same seed + same intents in the same order = the same
+to re-simulate a match from its match statistics file. Same seed + same intents in the same order = the same
 world everywhere.
 
 ```ts

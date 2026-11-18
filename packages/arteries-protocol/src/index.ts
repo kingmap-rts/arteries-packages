@@ -4,5 +4,5 @@
  * shared constants are in @kingmap-rts/arteries-types.
  */
 export { cleanIntent } from './intent';
-export { cleanReplay } from './replay';
+export { cleanMatchStats } from './stats';
 export { spreadSeats } from './seats';
