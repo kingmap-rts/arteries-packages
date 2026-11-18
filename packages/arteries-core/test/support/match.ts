@@ -11,7 +11,7 @@ export interface MatchSpec {
   crystal?: number;
 }
 
-export function runMatch(spec: MatchSpec) {
+export async function runMatch(spec: MatchSpec) {
   rules.TUNE.crystal = spec.crystal ?? 1;
   const game = createGame({
     seed: spec.seed,
@@ -35,8 +35,12 @@ export function runMatch(spec: MatchSpec) {
   let t30: number | null = null;
   let t40: number | null = null;
   const t0 = performance.now();
+  let steps = 0;
   while (!G.over && G.t < spec.maxT) {
     game.step();
+    // yield to the event loop now and then: one match takes over a minute on a slow CI runner,
+    // and a blocked worker misses the test runner's RPC deadline
+    if (++steps % 250 === 0) await new Promise(r => setImmediate(r));
     if (G.t >= nextMinute) {
       const row = players().map(p =>
         p.alive ? Math.round(p.land * 1000) / 10 : 0,

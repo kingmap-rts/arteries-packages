@@ -21,7 +21,11 @@ describe('parity with the prototype', () => {
     const leaders: number[] = [];
     const elims: number[] = [];
     for (let k = 0; k < N; k++) {
-      const r = runMatch({ seed: 5000 + k, maxT: 1200, botParams: OLD_AI });
+      const r = await runMatch({
+        seed: 5000 + k,
+        maxT: 1200,
+        botParams: OLD_AI,
+      });
       const last = r.shares[r.shares.length - 1];
       leaders.push(Math.max(...last));
       elims.push(last.filter(v => v === 0).length);

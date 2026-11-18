@@ -53,7 +53,7 @@ describe('invariants over a 15-minute bot match', () => {
     const { terrain } = game.map;
     const walkable = (t: number) => t === Terrain.Plain || t === Terrain.Forest;
     for (let i = 1; i <= 9000; i++) {
-      if (i % 1000 === 0) await new Promise(res => setImmediate(res));
+      if (i % 250 === 0) await new Promise(res => setImmediate(res));
       game.step();
       if (i % 300 !== 0) continue;
       for (const p of G.players) {

@@ -27,7 +27,7 @@ describe(`golden matches (${fixture.recordedWith})`, () => {
 
         for (let n = 0; n < sc.ticks; n++) {
           // let the test runner breathe on slow CI machines (long synchronous loops time it out)
-          if (n % 1000 === 999) await new Promise(r => setImmediate(r));
+          if (n % 250 === 249) await new Promise(r => setImmediate(r));
           for (const [kind, v] of events.get(n) ?? []) {
             if (kind === 'crystal') for (const s of humans) d.addCrystal(s, v);
             if (kind === 'lang') d.setLang(v);
