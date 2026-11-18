@@ -16,6 +16,7 @@ the core, the tools. Import types from here, not from the packages that use them
 | `net/messages`    | `ClientMsg`, `ServerMsg`, `ServerError`, `SeatIntent`, `LobbyPlayer`, `OpenRoom`                      |
 | `net/replay`      | `Replay`                                                                                              |
 | `api/http`        | the backend's HTTP bodies: `OnlineStats`, `FeedbackRequest`, `ClientErrorReport`                      |
+| `api/user`        | players and accounts: `UserProfile`, `PublicUser`, enum `AuthProvider`                                |
 
 ```ts
 import {
