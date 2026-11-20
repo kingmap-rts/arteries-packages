@@ -23,7 +23,14 @@ import {
   yieldBonus,
 } from './modifiers';
 import { G } from './state';
-import { acquireTarget, fire, hit, kill } from './systems/combat';
+import {
+  acquireTarget,
+  attackSpot,
+  countTargets,
+  fire,
+  hit,
+  kill,
+} from './systems/combat';
 import { diploTick, hostile } from './systems/diplomacy';
 import { banditLoot, sendCaravan, wagonTick } from './systems/logistics';
 import { followPath, moveToward } from './systems/movement';
@@ -39,6 +46,9 @@ import { rand } from './util/rng';
 import { centerX, centerY, isDepot } from './world/entities';
 import { msg, notify, snapshot } from './world/events';
 import { walkable } from './world/terrain';
+
+/** units that ran at a foe this tick (the separation lets them slip past their own troops) */
+const chasing = new Set<number>();
 
 /** separation between walking units turns by about 16 degrees (cos, sin) */
 const SIDESTEP_C = 0.96;
@@ -245,6 +255,8 @@ export function update(dt: number) {
     }
   }
   // units
+  countTargets();
+  chasing.clear();
   for (const u of G.units) {
     if (u.dead) continue;
     const S = UNITS[u.type];
@@ -278,9 +290,13 @@ export function update(dt: number) {
             u.path = findPath(u.x | 0, u.y | 0, tx | 0, ty | 0);
           }
           followPath(u, SPD, dt);
-        } else moveToward(u, tx, ty, SPD, dt);
+        } else if (t.kind === 'u') moveToward(u, ...attackSpot(u, t), SPD, dt);
+        else moveToward(u, tx, ty, SPD, dt);
+        chasing.add(u.id);
       } else if (d < S.aggro * 1.7 && u.type !== 'siege') {
-        moveToward(u, tx, ty, SPD, dt);
+        if (t.kind === 'u') moveToward(u, ...attackSpot(u, t), SPD, dt);
+        else moveToward(u, tx, ty, SPD, dt);
+        chasing.add(u.id);
       } else {
         u.tgt = 0;
         if (u.dest) u.path = findPath(u.x | 0, u.y | 0, u.dest[0], u.dest[1]);
@@ -354,9 +370,14 @@ export function update(dt: number) {
         const push = ((rr - d) * 0.5) / d;
         let px = dx * push;
         let py = dy * push;
-        if (a.path && a.path.length && b.path && b.path.length) {
-          // both are walking: push a little sideways too, so two units meeting head-on step
-          // around each other instead of stalling nose to nose
+        if (
+          (a.path && a.path.length && b.path && b.path.length) ||
+          chasing.has(a.id) ||
+          chasing.has(b.id)
+        ) {
+          // both are walking, or one runs at a foe: push a little sideways too, so two units
+          // meeting head-on step around each other, and an attacker stuck behind its own troops
+          // slips past them to the enemy instead of shoving them from behind
           const rx = px * SIDESTEP_C - py * SIDESTEP_S;
           py = py * SIDESTEP_C + px * SIDESTEP_S;
           px = rx;

@@ -7,7 +7,8 @@ import { G } from '../state';
 import { hostile } from './diplomacy';
 import { findPath } from './pathfinding';
 import { memberLoss } from './squads';
-import { dist, tileIndex } from '../util/geometry';
+import { detCos, detSin, dist, tileIndex } from '../util/geometry';
+import { walkable } from '../world/terrain';
 import { rand } from '../util/rng';
 import { lootCarried, centerX, centerY } from '../world/entities';
 import { logEvent, msg, notify } from '../world/events';
@@ -93,6 +94,73 @@ export function eliminate(pid: number, by?: number) {
   }
 }
 
+/** a unit's body radius for the separation, tiles */
+export const bodyR = (u: Unit) => (u.n > 1 ? 0.5 : 0.275);
+
+/** directions of the attack spots around a foe */
+const RING = Array.from({ length: 16 }, (_, i) => [
+  detCos((i * Math.PI) / 8),
+  detSin((i * Math.PI) / 8),
+]);
+
+/**
+ * Where u should run to hit foe t: the free spot in reach around t nearest to u, so attackers
+ * spread around their foe and walk past their own troops instead of pressing on their backs.
+ * The foe itself when every spot is taken.
+ */
+export function attackSpot(u: Unit, t: Unit): [number, number] {
+  const S = UNITS[u.type];
+  const touch = bodyR(u) + bodyR(t);
+  const r = Math.max(touch, Math.min(S.range * 0.85, touch + 0.3));
+  const near: Unit[] = [];
+  for (const o of G.units)
+    if (
+      o !== u &&
+      o !== t &&
+      !o.dead &&
+      Math.abs(o.x - t.x) < r + 1.2 &&
+      Math.abs(o.y - t.y) < r + 1.2
+    )
+      near.push(o);
+  let bx = t.x;
+  let by = t.y;
+  let bd = 1e9;
+  for (const [c, s] of RING) {
+    const x = t.x + c * r;
+    const y = t.y + s * r;
+    if (!walkable(x | 0, y | 0)) continue;
+    let free = true;
+    for (const o of near)
+      if (dist(o.x, o.y, x, y) < (bodyR(o) + bodyR(u)) * 0.9) {
+        free = false;
+        break;
+      }
+    if (!free) continue;
+    const d = dist(u.x, u.y, x, y);
+    if (d < bd) {
+      bd = d;
+      bx = x;
+      by = y;
+    }
+  }
+  return [bx, by];
+}
+
+/** how much farther a foe looks for every unit of ours already attacking it, tiles */
+const CROWD = 0.5;
+
+/** units of each seat on each target (key: target id * SEATS + seat), counted once per tick */
+const onTarget = new Map<number, number>();
+
+export function countTargets() {
+  onTarget.clear();
+  for (const u of G.units) {
+    if (u.dead || !u.tgt) continue;
+    const k = u.tgt * SEATS + u.owner;
+    onTarget.set(k, (onTarget.get(k) ?? 0) + 1);
+  }
+}
+
 export function acquireTarget(u: Unit) {
   if (u.type === 'wagon') {
     u.tgt = 0;
@@ -133,16 +201,24 @@ export function acquireTarget(u: Unit) {
       return;
     }
   }
+  // the nearest foe, but one already surrounded by our troops counts as farther: attackers spread
+  // over the enemy instead of queueing behind each other for the same one
+  let bs = 1e9;
   for (const o of G.units) {
     if (o.dead || !hostile(u.owner, o.owner)) continue;
     const d = Math.abs(o.x - u.x) + Math.abs(o.y - u.y);
     if (d > bd * 1.5) continue;
     const e = dist(o.x, o.y, u.x, u.y);
-    if (e < bd) {
-      bd = e;
+    if (e >= bd) continue;
+    const crowd =
+      (onTarget.get(o.id * SEATS + u.owner) ?? 0) - (u.tgt === o.id ? 1 : 0);
+    const sc = e + CROWD * crowd;
+    if (sc < bs) {
+      bs = sc;
       best = o;
     }
   }
+  if (best) bd = dist(best.x, best.y, u.x, u.y);
   if (!best) {
     bd = u.type === 'raid' ? 5 : 3.5;
     for (const c of G.convoys) {
