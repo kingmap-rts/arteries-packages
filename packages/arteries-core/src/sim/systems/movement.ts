@@ -35,15 +35,37 @@ export function moveToward(
   return st >= d;
 }
 
+/** the last waypoint counts as reached this close to its centre */
+const ARRIVE = 0.25;
+
 export function followPath(e: Unit, speed: number, dt: number) {
-  if (!e.path || !e.path.length) return true;
-  const [wx, wy] = e.path[0];
+  const p = e.path;
+  if (!p || !p.length) return true;
+  // a waypoint on the way is passed as soon as the unit stands in its tile: it never has to hit
+  // the exact centre (separation keeps units apart, so two of them sharing a waypoint would block
+  // each other there forever), and no tick is spent on the last few hundredths of a tile.
+  // Heading from anywhere in a tile to the centre of the next one stays on walkable ground:
+  // A* never cuts a corner.
+  while (p.length > 1 && (e.x | 0) === p[0][0] && (e.y | 0) === p[0][1])
+    p.shift();
+  const [wx, wy] = p[0];
   const tx = wx + 0.5;
   const ty = wy + 0.5;
-  if (dist(e.x, e.y, tx, ty) < 0.12 || moveToward(e, tx, ty, speed, dt)) {
-    e.path.shift();
+  if (p.length === 1 && dist(e.x, e.y, tx, ty) < ARRIVE) {
+    p.shift();
+    return true;
   }
-  return !e.path.length;
+  const x0 = e.x;
+  const y0 = e.y;
+  if (moveToward(e, tx, ty, speed, dt)) {
+    p.shift();
+  } else if (e.x === x0 && e.y === y0) {
+    // pushed off the path onto a tile from which the waypoint cannot be walked to: route again
+    const [gx, gy] = p[p.length - 1];
+    e.path = findPath(e.x | 0, e.y | 0, gx, gy);
+    return !e.path || !e.path.length;
+  }
+  return !p.length;
 }
 
 export const SPIRAL = (() => {

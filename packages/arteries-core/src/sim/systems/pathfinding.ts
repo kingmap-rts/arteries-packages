@@ -110,9 +110,14 @@ export function findPath(
   seenIn[si] = searchNo;
   cameFrom[si] = -1;
   heapPush(si, 0);
+  // every pop expands a tile once or drops a stale entry, and a tile pushes at most 8:
+  // the search always finishes, the cap only guards against a broken heap
   let it = 0;
   let found = false;
-  while (heapKeys.length && it++ < 24000) {
+  // the explored tile nearest to the goal: an unreachable goal still gets a path to its edge
+  let best = si;
+  let bestH = 1e9;
+  while (heapKeys.length && it++ < TILES * 8) {
     const cur = heapPop();
     if (cur === ti) {
       found = true;
@@ -122,6 +127,13 @@ export function findPath(
     closedIn[cur] = searchNo;
     const cx = cur % MAP_W;
     const cy = (cur / MAP_W) | 0;
+    const hx = Math.abs(cx - tx);
+    const hy = Math.abs(cy - ty);
+    const h = Math.max(hx, hy) + 0.414 * Math.min(hx, hy);
+    if (h < bestH) {
+      bestH = h;
+      best = cur;
+    }
     for (const [dx, dy, c] of NEIGHBOURS) {
       const nx = cx + dx;
       const ny = cy + dy;
@@ -142,9 +154,10 @@ export function findPath(
       }
     }
   }
-  if (!found) return null;
+  const end = found ? ti : best;
+  if (end === si) return null;
   const out: Tile[] = [];
-  let c = ti;
+  let c = end;
   while (c !== si && c !== -1) {
     out.push([c % MAP_W, (c / MAP_W) | 0]);
     c = cameFrom[c];

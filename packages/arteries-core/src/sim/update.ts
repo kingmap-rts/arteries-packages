@@ -40,6 +40,10 @@ import { centerX, centerY, isDepot } from './world/entities';
 import { msg, notify, snapshot } from './world/events';
 import { walkable } from './world/terrain';
 
+/** separation between walking units turns by about 16 degrees (cos, sin) */
+const SIDESTEP_C = 0.96;
+const SIDESTEP_S = 0.28;
+
 export function update(dt: number) {
   G.t += dt;
   G.netT -= dt;
@@ -347,9 +351,16 @@ export function update(dt: number) {
       if (Math.abs(dx) > rr || Math.abs(dy) > rr) continue;
       const d = vecLen(dx, dy) || 0.01;
       if (d < rr) {
-        const push = (rr - d) * 0.5;
-        const px = (dx / d) * push;
-        const py = (dy / d) * push;
+        const push = ((rr - d) * 0.5) / d;
+        let px = dx * push;
+        let py = dy * push;
+        if (a.path && a.path.length && b.path && b.path.length) {
+          // both are walking: push a little sideways too, so two units meeting head-on step
+          // around each other instead of stalling nose to nose
+          const rx = px * SIDESTEP_C - py * SIDESTEP_S;
+          py = py * SIDESTEP_C + px * SIDESTEP_S;
+          px = rx;
+        }
         if (walkable((a.x - px) | 0, (a.y - py) | 0)) {
           a.x -= px;
           a.y -= py;
